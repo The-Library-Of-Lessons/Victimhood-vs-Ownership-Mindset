@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Victimhood Mindset vs. Ownership Mindset</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+  // Runs in <head> before first paint (no flash). Every storage call is in try/catch.
+  (function () {
+    const root = document.documentElement;
+    const KEY = 'guide_theme_v1';
+    let saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) {}
+    const systemLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+    root.setAttribute('data-theme', saved || (systemLight ? 'light' : 'dark'));
+
+    function applyTheme(mode) {
+      root.setAttribute('data-theme', mode);
+      try { localStorage.setItem(KEY, mode); } catch (e) {}
+      const btn = document.getElementById('theme-toggle');
+      if (btn) btn.setAttribute('aria-pressed', String(mode === 'light'));
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const btn = document.getElementById('theme-toggle');
+      if (!btn) return;
+      btn.setAttribute('aria-pressed', String(root.getAttribute('data-theme') === 'light'));
+      btn.addEventListener('click', function () {
+        applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+      });
+    });
+  })();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+:root { --sb-width: 280px; --font-display: 'Cormorant Garamond', serif; --font-mono: 'JetBrains Mono', monospace; }
+:root[data-theme="dark"] {
+  --bg: #120e08; --bg-card: #1c1712; --bg2: #251e17;
+  --text: #e8e6e1; --text-muted: #9a978f; --border: rgba(255,255,255,0.08);
+  --accent: #e8b4a8; --accent2: #c9a876; --accent3: #e0c068; --green: #a8c090;
+  --accent-rgb: 232, 180, 168; --accent2-rgb: 201, 168, 118; --accent3-rgb: 224, 192, 104; --green-rgb: 168, 192, 144;
+}
+:root[data-theme="light"] {
+  --bg: #faf6ef; --bg-card: #f1ebdd; --bg2: #e8dfc9;
+  --text: #241f18; --text-muted: #6b6355; --border: #ddd3bf;
+  --accent: #c74527; --accent2: #906a30; --accent3: #8d6c13; --green: #5b783e;
+  --accent-rgb: 199, 69, 39; --accent2-rgb: 144, 106, 48; --accent3-rgb: 141, 108, 19; --green-rgb: 91, 120, 62;
+}
+
+/* ===== Base ===== */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 1.0625rem; line-height: 1.7; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; }
+h2 { font-size: 2rem; margin: 0 0 18px; }
+h3 { font-size: 1.25rem; }
+p { margin: 0 0 16px; }
+a { color: var(--accent); }
+button { font-family: inherit; }
+:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+#main { margin-left: var(--sb-width); padding-top: 64px; }
+section[id] { border-top: 1px solid var(--border); }
+.section-inner { max-width: 720px; margin: 0 auto; padding: 56px 20px; }
+.section-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent2); margin-bottom: 10px; }
+.pull-quote { margin: 28px 0; padding: 18px 22px; border-left: 4px solid var(--accent3); background: rgba(var(--accent3-rgb), 0.07); border-radius: 0 12px 12px 0; font-family: var(--font-display); font-size: 1.45rem; line-height: 1.4; font-style: italic; color: var(--text); }
+
+/* ===== Hero ===== */
+.hero { position: relative; padding: 64px 0 56px; text-align: center; overflow: hidden; }
+.hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(var(--accent-rgb), 0.12) 0%, transparent 70%); pointer-events: none; }
+.hero::after { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 24px 24px; pointer-events: none; }
+.hero h1 { text-shadow: 0 0 60px rgba(var(--accent-rgb), 0.35); }
+.hero-inner { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 0 20px; }
+.hero-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent2); margin-bottom: 14px; }
+.hero-title { font-family: var(--font-display); font-weight: 600; font-size: clamp(2.2rem, 7vw, 3.4rem); line-height: 1.1; margin: 0 0 14px; }
+.hero-tagline { font-style: italic; color: var(--text-muted); font-size: 1.05rem; margin: 0; }
+.hero-intro { color: var(--text); margin: 0; }
+.hero-meta { margin: 12px 0 20px; display: flex; justify-content: center; gap: 12px; }
+.read-time-pill { font-family: var(--font-mono); font-size: 11px; color: var(--accent); background: rgba(var(--accent-rgb), 0.1); border: 1px solid rgba(var(--accent-rgb), 0.3); border-radius: 20px; padding: 4px 14px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ===== Reading bar, back to top ===== */
+#reading-bar { position: fixed; top: 0; left: 0; right: 0; height: 4px; z-index: 999; background: transparent; pointer-events: none; }
+#reading-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3, var(--accent))); background-size: 200% 100%; animation: bar-shimmer 3s linear infinite; transition: width 0.15s ease-out; border-radius: 0 2px 2px 0; box-shadow: 0 0 8px var(--accent); }
+@keyframes bar-shimmer { 0% { background-position: 0% 0%; } 100% { background-position: 200% 0%; } }
+#back-to-top { position: fixed; right: 18px; bottom: 18px; width: 44px; height: 44px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border); color: var(--accent); font-size: 18px; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 80; }
+#back-to-top.show { opacity: 1; pointer-events: auto; }
+
+/* ===== Sidebar ===== */
+#sidebar { position: fixed; top: 0; left: 0; width: 280px; height: 100vh; background: var(--bg-card); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 200; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
+.sb-header { padding: 20px 20px 14px; border-bottom: 1px solid var(--border); }
+.sb-emoji { font-size: 26px; color: var(--accent); margin-bottom: 6px; }
+.sb-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sb-cat { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-top: 4px; }
+#sb-nav { flex: 1; overflow-y: auto; padding: 10px 0; }
+.sb-group-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); padding: 12px 20px 6px; }
+.sb-link { display: flex; align-items: center; gap: 10px; padding: 10px 20px 10px 18px; color: var(--text-muted); text-decoration: none; font-size: 13.5px; border-left: 3px solid transparent; transition: all 0.18s; cursor: pointer; }
+.sb-link:hover { color: var(--text); background: rgba(var(--accent-rgb), 0.05); border-left-color: var(--text-muted); }
+.sb-link.active { color: var(--accent); border-left-color: var(--accent); background: rgba(var(--accent-rgb), 0.1); font-weight: 700; }
+.sb-icon { font-size: 15px; }
+.sb-section-num { font-family: var(--font-mono); font-size: 10px; color: var(--accent2); background: rgba(var(--accent2-rgb), 0.12); border-radius: 10px; padding: 1px 7px; }
+.sb-link.visited .sb-section-num { color: var(--green); background: rgba(var(--green-rgb), 0.12); }
+.sb-time { font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); margin-left: auto; opacity: 0.6; white-space: nowrap; }
+.sb-sub-link { display: flex; align-items: center; gap: 6px; padding: 7px 16px 7px 40px; color: var(--text-muted); font-size: 12px; line-height: 1.3; border-left: 3px solid transparent; text-decoration: none; cursor: pointer; transition: all 0.18s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 32px; box-sizing: border-box; }
+.sb-sub-link::before { content: '›'; opacity: 0.5; flex-shrink: 0; }
+.sb-sub-link:hover { color: var(--text); background: rgba(var(--accent-rgb), 0.04); }
+.sb-sub-link.active { color: var(--accent); border-left-color: var(--accent); }
+.sb-footer { padding: 12px 20px; border-top: 1px solid var(--border); font-size: 10px; color: var(--text-muted); }
+#sb-close { display: none; position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; align-items: center; justify-content: center; background: none; border: 1px solid var(--border); border-radius: 10px; color: var(--text); cursor: pointer; }
+#sb-overlay { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+#sb-overlay.visible { opacity: 1; pointer-events: auto; }
+
+/* ===== Topbar ===== */
+#topbar { position: fixed; top: 4px; left: var(--sb-width, 280px); right: 0; height: 56px; background: var(--bg-card); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; z-index: 90; gap: 12px; }
+#menu-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: none; border: 1px solid var(--border); border-radius: 10px; color: var(--text); cursor: pointer; flex-shrink: 0; }
+@media (min-width: 861px) { #menu-btn { display: none; } }
+#topbar-title { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.topbar-icon-btn { display: flex; align-items: center; gap: 6px; background: rgba(var(--accent-rgb), 0.08); border: 1px solid rgba(var(--accent-rgb), 0.25); border-radius: 20px; padding: 6px 14px; font-family: var(--font-mono); font-size: 11px; color: var(--accent); cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.topbar-icon-btn:hover { background: rgba(var(--accent-rgb), 0.16); }
+.topbar-icon-btn.speaking { animation: listen-pulse 1.6s ease-in-out infinite; }
+@keyframes listen-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.35); } 50% { box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0); } }
+#theme-toggle { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(var(--accent-rgb), 0.08); border: 1px solid rgba(var(--accent-rgb), 0.25); border-radius: 50%; color: var(--accent); cursor: pointer; }
+#theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] #theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] #theme-toggle .icon-moon { display: block; }
+
+/* Search */
+#search-wrap { position: relative; }
+#search-input { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; color: var(--text); padding: 8px 36px 8px 14px; font-size: 13px; min-height: 36px; width: 220px; }
+.search-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5; pointer-events: none; }
+#search-results { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; max-height: 320px; overflow-y: auto; opacity: 0; pointer-events: none; transform: translateY(-6px); transition: opacity 0.15s, transform 0.15s; z-index: 300; }
+#search-results.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.search-result-item { padding: 10px 14px; font-size: 13px; color: var(--text-muted); cursor: pointer; border-bottom: 1px solid var(--border); }
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover, .search-result-item.active { background: rgba(var(--accent-rgb), 0.08); color: var(--text); }
+
+/* Heart */
+.heart-btn .heart-icon { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; transition: fill 0.15s, stroke 0.15s, transform 0.15s; }
+.heart-btn[aria-pressed="true"] .heart-icon { fill: var(--accent); stroke: var(--accent); }
+.heart-btn.pulsing .heart-icon { animation: heart-pulse 0.32s ease; }
+@keyframes heart-pulse { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 100% { transform: scale(1); } }
+.heart-closing-card { max-width: 480px; margin: 48px auto 64px; padding: 32px 28px; text-align: center; border: 1px solid var(--border); border-radius: 16px; background: var(--bg-card); }
+.heart-closing-text { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted, #8a90a3); margin: 0 0 16px; }
+.heart-btn-large { display: inline-flex; align-items: center; gap: 10px; background: rgba(var(--accent-rgb), 0.08); border: 1px solid rgba(var(--accent-rgb), 0.3); border-radius: 24px; padding: 12px 24px; font-family: var(--font-mono); font-size: 14px; color: var(--accent); cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.heart-btn-large:hover { background: rgba(var(--accent-rgb), 0.16); }
+.heart-btn-large:active { transform: scale(0.97); }
+.heart-btn-large .heart-icon { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; }
+.heart-btn-large[aria-pressed="true"] { background: rgba(var(--accent-rgb), 0.16); }
+
+/* Share toast */
+.share-toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(12px); background: var(--bg2, #1c2030); border: 1px solid rgba(var(--accent-rgb), 0.3); color: var(--text); font-family: var(--font-mono); font-size: 12px; padding: 10px 18px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 200; }
+.share-toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Overflow menu */
+#topbar-more-wrap { display: contents; }
+#topbar-more-menu { display: contents; }
+#topbar-more-btn { display: none; }
+
+/* ===== Section 02 / 03 / 04 components ===== */
+.tactic-card { cursor: pointer; padding: 16px 20px; min-height: 56px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; margin: 0 0 12px; transition: border-color 0.2s; }
+.tactic-card:hover, .tactic-card.open { border-color: rgba(var(--accent-rgb), 0.4); }
+.tactic-card:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.tactic-header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; pointer-events: none; }
+.tactic-header h3 { margin: 0; flex: 1; font-size: 1.35rem; }
+.tactic-tag { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent2); background: rgba(var(--accent2-rgb), 0.12); border: 1px solid rgba(var(--accent2-rgb), 0.3); border-radius: 20px; padding: 2px 10px; }
+.tactic-chevron { transition: transform 0.2s; color: var(--accent); font-size: 1.2rem; }
+.tactic-card.open .tactic-chevron { transform: rotate(180deg); }
+.tactic-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.2s ease; padding: 0; }
+.tactic-card.open .tactic-body { max-height: 2000px; padding: 12px 0 0; }
+.tactic-body p { font-size: 0.97rem; margin: 0 0 10px; }
+.tb-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent2); display: block; margin-bottom: 2px; }
+.flow { display: flex; flex-direction: column; margin: 24px 0; }
+.concept-card { background: var(--bg-card); border: 1px solid var(--border); border-top: 3px solid var(--accent2); border-radius: 14px; padding: 16px 20px; }
+.concept-card h3 { margin: 2px 0 8px; }
+.concept-card p { font-size: 0.97rem; margin: 0; }
+.cc-step { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent2); }
+.flow-arrow { text-align: center; color: var(--accent); font-size: 1.5rem; line-height: 1; padding: 8px 0; }
+
+/* ===== Section 05 ===== */
+.action-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin: 20px 0; }
+@media (min-width: 700px) { .action-grid { grid-template-columns: 1fr 1fr; } }
+.action-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+.action-icon { font-size: 26px; }
+.action-title { font-weight: 700; display: block; margin: 6px 0 4px; }
+.action-card p { font-size: 0.95rem; margin: 0 0 6px; }
+.applies-to-tag { display: inline-flex; align-items: center; font-family: var(--font-mono); font-size: 10px; color: var(--accent2); background: rgba(var(--accent2-rgb), 0.1); border: 1px solid rgba(var(--accent2-rgb), 0.3); border-radius: 20px; padding: 4px 10px; text-decoration: none; cursor: pointer; }
+.applies-to-tag:hover { background: rgba(var(--accent2-rgb), 0.22); }
+.anchor-pulse { animation: anchor-flash 1.2s ease; }
+@keyframes anchor-flash { 0%, 100% { box-shadow: none; } 30% { box-shadow: 0 0 0 3px rgba(var(--accent2-rgb), 0.4); } }
+.control-map { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin: 28px 0 8px; }
+.control-map h3 { margin: 0 0 6px; }
+.control-map p { font-size: 0.95rem; }
+.cm-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0; }
+.cm-inputs label { display: flex; flex-direction: column; gap: 4px; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+.cm-inputs input { background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 8px 10px; font-size: 16px; min-height: 44px; width: 100%; }
+@media (max-width: 480px) { .cm-inputs { grid-template-columns: 1fr; } }
+.chart-wrap { position: relative; height: 320px; max-width: 100%; margin: 24px 0; }
+#control-readout { margin: 0; font-size: 0.95rem; color: var(--text-muted); min-height: 1.5em; }
+
+/* ===== Section 06 ===== */
+.contrast-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 20px 0; }
+@media (min-width: 700px) { .contrast-grid { grid-template-columns: 1fr 1fr; } }
+.contrast-col { border-radius: 14px; padding: 18px 20px; border: 1px solid var(--border); }
+.contrast-col.good { background: rgba(var(--green-rgb), 0.07); border-top: 3px solid var(--green); }
+.contrast-col.bad { background: rgba(var(--accent-rgb), 0.07); border-top: 3px solid var(--accent); }
+.contrast-col h3 { margin: 0 0 12px; font-size: 1.3rem; }
+.c-item { display: flex; gap: 10px; margin-bottom: 14px; font-size: 0.95rem; }
+.c-item:last-child { margin-bottom: 0; }
+.c-dot { flex: 0 0 10px; height: 10px; border-radius: 50%; margin-top: 9px; }
+.good .c-dot { background: var(--green); }
+.bad .c-dot { background: var(--accent); }
+
+/* ===== Closing quote ===== */
+.section-quote { position: relative; margin: 32px 0 8px; padding: 20px 24px 20px 28px; border-left: 4px solid var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); border-radius: 0 12px 12px 0; }
+.section-quote.q2 { border-left-color: var(--accent2); background: color-mix(in srgb, var(--accent2) 6%, transparent); }
+.section-quote.q2 .quote-mark { fill: var(--accent2); }
+.quote-mark { width: 28px; height: 28px; fill: var(--accent); opacity: 0.35; margin-bottom: 8px; }
+.quote-text { font-style: italic; font-size: 1.05rem; line-height: 1.6; color: var(--text); margin: 0 0 8px; }
+.quote-attribution { font-style: normal; font-size: 0.9rem; color: var(--text-muted); font-weight: 600; }
+
+/* ===== Narrative scenes ===== */
+.story-scene { margin: 36px 0; }
+.scene-setup { font-size: 13.5px; color: var(--text-muted); font-style: italic; margin-bottom: 16px; }
+.scene-block { border-radius: 16px; padding: 18px 20px; margin-bottom: 14px; }
+.scene-block.wrong { background: rgba(var(--accent2-rgb),0.06); border: 1px solid rgba(var(--accent2-rgb),0.28); border-left: 4px solid var(--accent2); }
+.scene-block.right { background: rgba(var(--green-rgb),0.06); border: 1px solid rgba(var(--green-rgb),0.28); border-left: 4px solid var(--green); }
+.scene-label { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+.scene-label.wrong-label { color: var(--accent2); }
+.scene-label.right-label { color: var(--green); }
+.dialogue-line { margin: 0 0 10px; font-size: 14px; line-height: 1.55; }
+.dialogue-line:last-child { margin-bottom: 0; }
+.dialogue-line .speaker { font-weight: 700; color: var(--text); margin-right: 4px; }
+.scene-note { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-muted); }
+.scene-note strong { color: var(--text); }
+.scene-tags { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ===== Micro-check ===== */
+.micro-check { margin: 28px 0; padding: 16px 18px; border: 1px solid var(--border); border-radius: 12px; background: rgba(var(--accent2-rgb), 0.04); }
+.micro-check-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--accent2); margin: 0 0 8px; }
+.micro-check-q { font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 12px; }
+.micro-check-options { display: flex; flex-direction: column; gap: 8px; }
+.micro-check-option { text-align: left; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 10px 14px; min-height: 40px; cursor: pointer; font-family: inherit; font-size: 13.5px; }
+.micro-check-option:disabled { cursor: default; }
+.micro-check-option.correct { border-color: var(--green); color: var(--green); }
+.micro-check-option.selected.wrong { border-color: var(--accent); color: var(--accent); }
+
+/* ===== Section 08 story cards ===== */
+.story-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; align-items: start; }
+.story-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; transition: transform 0.2s, border-color 0.2s; cursor: default; }
+.story-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+.story-card-header { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+.story-avatar { font-size: 28px; }
+.story-name { font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; }
+.story-trait { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--accent); }
+.story-hook { font-size: 14px; margin: 0 0 6px; }
+.story-toggle { background: none; border: none; cursor: pointer; font-family: var(--font-mono); font-size: 12px; color: var(--accent); padding: 8px 0; text-align: left; min-height: 44px; }
+.story-full { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.2s ease; }
+.story-full.open { max-height: 2000px; padding-top: 12px; }
+.story-full p { font-size: 14px; line-height: 1.65; margin: 0 0 12px; }
+
+/* ===== Section 09 / 11 ===== */
+.summary-banner { margin: 20px 0; padding: 36px 28px; border-radius: 18px; border: 1px solid rgba(var(--accent-rgb), 0.35); background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.14), rgba(var(--accent2-rgb), 0.14)); text-align: center; }
+.summary-sentence { font-family: var(--font-display); font-size: 1.75rem; line-height: 1.35; color: var(--accent); margin: 0; }
+.summary-today { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); margin: 20px 0 0; }
+.disclaimer-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; color: var(--text-muted); font-size: 0.95rem; }
+.disclaimer-card p { margin: 0 0 12px; }
+.disclaimer-card ul { margin: 0; padding-left: 20px; }
+.disclaimer-card li { margin-bottom: 6px; }
+
+/* ===== Pre-test ===== */
+.pretest-card { max-width: 720px; margin: 0 auto 32px; padding: 18px 20px; border: 1px solid var(--border); border-radius: 12px; background: rgba(var(--accent2-rgb), 0.04); }
+.pretest-note { font-size: 13px; color: var(--text-muted); margin: 0 0 12px; }
+.pretest-q .quiz-q-text { font-size: 16px; }
+.pretest-done { margin: 0; color: var(--green); font-size: 14px; }
+
+/* ===== Quiz ===== */
+#quiz-progress-bar { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+#quiz-score-display { color: var(--accent); font-weight: 600; }
+.quiz-progress-sep { opacity: 0.5; }
+.quiz-card { padding: 32px 28px; border-radius: 20px; background: var(--bg-card); border: 1px solid var(--border); }
+.quiz-q-text { font-family: var(--font-display); font-weight: 600; font-size: 22px; line-height: 1.3; margin: 0 0 24px; }
+.quiz-options { display: flex; flex-direction: column; gap: 14px; }
+.quiz-option { text-align: left; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 14px; padding: 16px 18px; min-height: 44px; cursor: pointer; font-family: inherit; font-size: 16px; transition: border-color 0.15s, background 0.15s; }
+.quiz-option:hover:not(:disabled) { border-color: var(--accent2); }
+.quiz-option:disabled { cursor: default; }
+.quiz-option.correct { border-color: var(--green); color: var(--green); }
+.quiz-option.selected.wrong { border-color: var(--accent); color: var(--accent); }
+#quiz-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 24px; }
+.quiz-nav-btn { font-family: var(--font-mono); font-size: 14px; font-weight: 600; border-radius: 12px; padding: 14px 28px; cursor: pointer; min-height: 44px; background: none; border: 1px solid var(--border); color: var(--text-muted); }
+.quiz-nav-btn[disabled] { opacity: 0.35; cursor: not-allowed; }
+.quiz-nav-btn-primary { background: var(--accent2); border-color: var(--accent2); color: var(--bg); }
+.quiz-nav-btn-primary[disabled] { background: rgba(var(--accent2-rgb), 0.35); border-color: transparent; color: rgba(0,0,0,0.4); }
+.quiz-complete { margin-top: 32px; padding: 28px 24px; border-radius: 14px; background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.12), rgba(var(--accent2-rgb), 0.12)); border: 1px solid rgba(var(--accent-rgb), 0.3); text-align: center; }
+.quiz-complete-score { font-family: var(--font-display); font-size: 28px; color: var(--accent); margin-bottom: 8px; }
+#quiz-complete-message { color: var(--text-muted); margin-bottom: 4px; }
+#quiz-growth-line { color: var(--text-muted); font-size: 14px; }
+#quiz-review-list { display: flex; flex-direction: column; gap: 14px; margin: 16px 0; text-align: left; }
+.quiz-review-item { padding: 12px 14px; border: 1px solid rgba(var(--accent2-rgb), 0.25); border-radius: 8px; }
+.quiz-review-link { display: block; font-family: var(--font-mono); font-size: 12px; color: var(--accent2); text-decoration: none; cursor: pointer; margin-bottom: 6px; }
+.quiz-review-link:hover { text-decoration: underline; }
+.quiz-review-your-answer { margin: 0 0 4px; font-size: 13.5px; color: var(--accent); }
+.quiz-review-correct-answer { margin: 0 0 8px; font-size: 13.5px; color: var(--green); }
+.quiz-review-explanation { margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.5; }
+.quiz-retake-btn, .quiz-reset-btn { font-family: var(--font-mono); font-size: 12px; background: none; border: 1px solid var(--accent); color: var(--accent); border-radius: 20px; padding: 8px 18px; cursor: pointer; min-height: 44px; }
+.quiz-reset-btn { border-color: var(--border); color: var(--text-muted); margin-left: 8px; }
+.quiz-export-toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.quiz-export-btn { font-family: var(--font-mono); font-size: 13px; font-weight: 600; background: none; border: 1px solid var(--border); color: var(--text-muted); border-radius: 20px; padding: 10px 20px; cursor: pointer; min-height: 44px; transition: border-color 0.15s, color 0.15s; }
+.quiz-export-btn:hover:not(:disabled) { border-color: var(--accent2); color: var(--accent2); }
+.quiz-export-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ===== Section 12 ===== */
+#section-12 .section-inner { max-width: 720px; }
+.verbatim-notice { background: var(--bg-card); border: 1px solid var(--accent2); border-left: 4px solid var(--accent2); border-radius: 0 10px 10px 0; padding: 14px 18px; font-size: 13px; color: var(--text-muted); margin-bottom: 36px; }
+.verbatim-body { font-size: 16px; line-height: 1.85; }
+.verbatim-body h3 { font-family: var(--font-display); font-size: 21px; color: var(--accent); margin: 44px 0 16px; padding-top: 20px; border-top: 1px solid var(--border); }
+.verbatim-body h3:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+.verbatim-body p { margin: 0 0 14px; }
+
+/* ===== Mobile ===== */
+@media (max-width: 860px) {
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.open { transform: translateX(0); }
+  #topbar { left: 0; padding: 0 14px; }
+  #main { margin-left: 0; }
+  #menu-btn { display: flex; }
+  #sb-close { display: flex; }
+  .sb-link, #menu-btn, #sb-close, .quiz-option, .micro-check-option, .tactic-card, .story-toggle, .quiz-nav-btn, #theme-toggle, #search-input, .topbar-icon-btn, .applies-to-tag { min-height: 44px; min-width: 44px; }
+  h1 { font-size: clamp(1.6rem, 6vw, 2.2rem); }
+  h2 { font-size: clamp(1.3rem, 5vw, 1.7rem); }
+  body, p { font-size: 1rem; line-height: 1.6; }
+  #topbar-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60vw; }
+  canvas { max-width: 100%; height: 260px !important; }
+  .chart-wrap { height: 260px; }
+  .quiz-options, .story-grid { grid-template-columns: 1fr; }
+  .section-inner { padding-left: 16px; padding-right: 16px; }
+  #search-input { width: 160px; }
+  .sb-sub-link { padding-left: 34px; font-size: 12.5px; }
+  .listen-label, .print-label, .share-label, .heart-label { display: none; }
+  #topbar-more-btn { display: flex; }
+  #topbar-more-wrap { display: block; position: relative; }
+  #topbar-more-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; flex-direction: column; gap: 4px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 200; min-width: 170px; }
+  #topbar-more-menu.open { display: flex; }
+  #topbar-more-menu .topbar-icon-btn { width: 100%; justify-content: flex-start; }
+  #topbar-more-menu .listen-label, #topbar-more-menu .print-label, #topbar-more-menu .share-label { display: inline; }
+}
+@media (max-width: 480px) {
+  #topbar-title { display: none; }
+  #search-input { width: 40vw; }
+  .summary-sentence { font-size: 1.45rem; }
+  .quiz-card { padding: 22px 16px; }
+}
+
+/* ===== Accessibility, print ===== */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+@media print {
+  :root { --bg: #ffffff !important; --bg-card: #ffffff !important; --bg2: #ffffff !important; --text: #111111 !important; --text-muted: #444444 !important; --border: #cccccc !important; }
+  body { background: #ffffff !important; color: #111111 !important; }
+  #sidebar, #topbar, #reading-bar, #sb-overlay, .heart-closing-card, #back-to-top, #share-toast, #quiz-export-toolbar { display: none !important; }
+  #main { padding-top: 0 !important; margin-left: 0 !important; }
+  .tactic-body, .story-full { max-height: none !important; padding-top: 8px !important; }
+}
+  </style>
+</head>
+<body>
+<div id="reading-bar"><div id="reading-bar-fill"></div></div>
+<div id="sb-overlay"></div>
+<nav id="sidebar" aria-label="Guide sections">
+  <button id="sb-close" aria-label="Close sidebar menu">✕</button>
+  <div class="sb-header">
+    <div class="sb-emoji">🧭</div>
+    <div class="sb-title">Victimhood vs. Ownership Mindset</div>
+    <div class="sb-cat">Biblical / Faith · Mindset</div>
+  </div>
+  <div id="sb-nav">
+    <div class="sb-group-label">Learn</div>
+    <a class="sb-link" href="#section-01" data-section-id="section-01"><span class="sb-icon">💡</span><span class="sb-link-text">Why It Matters</span><span class="sb-section-num">01</span><span class="sb-time" id="time-section-01"></span></a>
+    <a class="sb-link" href="#section-02" data-section-id="section-02"><span class="sb-icon">📖</span><span class="sb-link-text">What Is It</span><span class="sb-section-num">02</span><span class="sb-time" id="time-section-02"></span></a>
+    <a class="sb-link" href="#section-03" data-section-id="section-03"><span class="sb-icon">🧩</span><span class="sb-link-text">Core Framework</span><span class="sb-section-num">03</span><span class="sb-time" id="time-section-03"></span></a>
+    <a class="sb-sub-link" href="#comp-focus-on-control">Focus on Control</a>
+    <a class="sb-sub-link" href="#comp-honest-self-talk">Honest Self-Talk</a>
+    <a class="sb-sub-link" href="#comp-mistakes-as-lessons">Mistakes as Lessons</a>
+    <a class="sb-sub-link" href="#comp-initiative">Initiative</a>
+    <a class="sb-link" href="#section-04" data-section-id="section-04"><span class="sb-icon">⚙️</span><span class="sb-link-text">How It Works</span><span class="sb-section-num">04</span><span class="sb-time" id="time-section-04"></span></a>
+    <div class="sb-group-label">Apply</div>
+    <a class="sb-link" href="#section-05" data-section-id="section-05"><span class="sb-icon">🛠️</span><span class="sb-link-text">Apply It Daily</span><span class="sb-section-num">05</span><span class="sb-time" id="time-section-05"></span></a>
+    <a class="sb-link" href="#section-06" data-section-id="section-06"><span class="sb-icon">⚖️</span><span class="sb-link-text">Benefits &amp; Consequences</span><span class="sb-section-num">06</span><span class="sb-time" id="time-section-06"></span></a>
+    <a class="sb-link" href="#section-07" data-section-id="section-07"><span class="sb-icon">🎭</span><span class="sb-link-text">Narrative Examples</span><span class="sb-section-num">07</span><span class="sb-time" id="time-section-07"></span></a>
+    <a class="sb-link" href="#section-08" data-section-id="section-08"><span class="sb-icon">🌟</span><span class="sb-link-text">Real-World Examples</span><span class="sb-section-num">08</span><span class="sb-time" id="time-section-08"></span></a>
+    <div class="sb-group-label">Review</div>
+    <a class="sb-link" href="#section-09" data-section-id="section-09"><span class="sb-icon">🎯</span><span class="sb-link-text">One-Sentence Summary</span><span class="sb-section-num">09</span><span class="sb-time" id="time-section-09"></span></a>
+    <a class="sb-link" href="#section-10" data-section-id="section-10"><span class="sb-icon">📝</span><span class="sb-link-text">Quiz</span><span class="sb-section-num">10</span><span class="sb-time" id="time-section-10"></span></a>
+    <a class="sb-link" href="#section-11" data-section-id="section-11"><span class="sb-icon">ℹ️</span><span class="sb-link-text">Disclaimer &amp; Sources</span><span class="sb-section-num">11</span><span class="sb-time" id="time-section-11"></span></a>
+    <div class="sb-group-label">Reference</div>
+    <a class="sb-link" href="#section-12" data-section-id="section-12"><span class="sb-icon">📄</span><span class="sb-link-text">Original Text</span><span class="sb-section-num">12</span><span class="sb-time" id="time-section-12"></span></a>
+  </div>
+  <div class="sb-footer">Scripture: King James Version (KJV)</div>
+</nav>
+
+<header id="topbar">
+  <button id="menu-btn" aria-label="Open sidebar menu">☰</button>
+  <span id="topbar-title">Introduction</span>
+  <div class="topbar-actions">
+    <div id="search-wrap">
+      <input type="text" id="search-input" placeholder="Search guide…" autocomplete="off" aria-label="Search this guide" />
+      <span class="search-icon" aria-hidden="true">🔍</span>
+      <div id="search-results" role="listbox"></div>
+    </div>
+    <button id="heart-toggle-top" class="topbar-icon-btn heart-btn" aria-label="Heart this guide" aria-pressed="false" title="Heart this guide">
+      <svg class="heart-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.7-4.35-9.3-8.1C.6 9.9 1.8 6 5.1 5c2-.6 3.9.2 5 1.8L12 8.5l1.9-1.7c1.1-1.6 3-2.4 5-1.8 3.3 1 4.5 4.9 2.4 7.9C18.7 16.65 12 21 12 21Z"/></svg>
+      <span class="heart-label">Heart</span>
+    </button>
+    <button id="theme-toggle" aria-label="Switch between light and dark mode" aria-pressed="false">
+      <svg class="icon-sun" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+      <svg class="icon-moon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+    </button>
+    <div id="topbar-more-wrap">
+      <button id="topbar-more-btn" class="topbar-icon-btn" aria-label="More actions" aria-haspopup="true" aria-expanded="false" title="More"><span aria-hidden="true">⋯</span></button>
+      <div id="topbar-more-menu">
+        <button id="listen-toggle" class="topbar-icon-btn" aria-label="Listen to this guide aloud" aria-pressed="false" title="Listen aloud"><span class="listen-icon">🔊</span><span class="listen-label">Listen</span></button>
+        <button id="print-pdf-btn" class="topbar-icon-btn" aria-label="Print or save this guide as a PDF" title="Print / Save as PDF"><span>🖨️</span><span class="print-label">Print</span></button>
+        <button id="share-btn" class="topbar-icon-btn" aria-label="Share this guide" title="Share"><span>🔗</span><span class="share-label">Share</span></button>
+      </div>
+    </div>
+  </div>
+</header>
+<div id="share-toast" class="share-toast" role="status" aria-live="polite"></div>
+
+<main id="main">
+  <header class="hero" id="hero">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">INTERACTIVE GUIDE</div>
+      <h1 class="hero-title">Victimhood Mindset vs. Ownership Mindset</h1>
+      <p class="hero-tagline" id="hero-tagline">You cannot always control what happens to you, but you can learn to control how you respond.</p>
+      <div class="hero-meta"><span class="read-time-pill" id="total-read-time">⏱ Calculating...</span></div>
+      <p class="hero-intro">Every one of us gets hurt, blamed, or stuck at some point. This guide shows two ways to respond: one keeps you waiting, and one moves you forward. By the end, you will know which one you reach for, and which small habits can change it.</p>
+    </div>
+  </header>
+
+  <div id="pretest" class="pretest-card">
+    <p class="micro-check-label">Quick gut-check</p>
+    <p class="pretest-note">No pressure. Just a quick starting point.</p>
+    <div id="pretest-body"></div>
+  </div>
+
+  <!-- ===== SECTION 01 ===== -->
+  <section id="section-01" aria-labelledby="s01-h">
+    <div class="section-inner">
+      <div class="section-label">Section 01</div>
+      <h2 id="s01-h">Why This Matters</h2>
+      <p>Most people do not choose to get stuck. They slide into it, one small excuse at a time. This section shows what that slide costs, so you can stop it early.</p>
+      <p>Think about the last time something went wrong for you. Did you first ask, “Whose fault is this?” or “What can I do?” That first question is a small signal. It shows which mindset you reach for under pressure.</p>
+      <p>Picture two drivers in the same traffic jam. Both are late. The first driver spends an hour angry at the road, the government, and every other car. The second driver calls ahead, finds another route, and arrives with a plan. The jam was the same. The results were not.</p>
+      <p>That is the real cost of a victimhood mindset. You spend your energy on things you cannot change. You grow tired, bitter, and slow. Meanwhile, the problem stays exactly where it was.</p>
+      <blockquote class="pull-quote">Don’t waste your energy proving why something is not your fault; invest your energy in discovering what you can do about it.</blockquote>
+      <p>The cost also reaches other people. A team member who always blames others makes the whole team harder to work with. A parent who always says, “It’s not my fault,” teaches children to say the same. A friend who only complains slowly runs out of listeners.</p>
+      <p>Scripture shows this pattern at the very start. Adam said the woman gave him the fruit, and Eve said the serpent tricked her. Each one pointed to someone else first (Genesis 3:12–13).</p>
+      <p>This is not about guilt. It is about freedom. Blame keeps your life in someone else’s hands. Ownership puts it back in yours. Few changes are more practical, at work, at home, and in faith.</p>
+
+      <div class="micro-check" data-check-id="section-01-mc1">
+        <p class="micro-check-label">Quick Check</p>
+        <p class="micro-check-q">In the traffic jam story, what made the second driver different?</p>
+        <div class="micro-check-options">
+          <button class="micro-check-option" data-option-id="a">He had no traffic at all</button>
+          <button class="micro-check-option" data-correct="true" data-option-id="b">He looked for something he could do about it</button>
+          <button class="micro-check-option" data-option-id="c">He was never late</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 02 ===== -->
+  <section id="section-02" aria-labelledby="s02-h">
+    <div class="section-inner">
+      <div class="section-label">Section 02</div>
+      <h2 id="s02-h">What Is It?</h2>
+      <p>Before you can change a mindset, you need to see it clearly. Here are both mindsets in plain words.</p>
+      <p>A <strong>victimhood mindset</strong> is the habit of focusing on what happened to you, who is responsible, and why you cannot do anything about it. It is like standing in front of a locked door and spending all your time describing who locked it. The description may be true. But you are still standing outside.</p>
+      <p>An <strong>ownership mindset</strong> is the habit of accepting responsibility for your choices, actions, and responses, even when the situation is not your fault. It is like asking, “Is there a key, or is there another door?” Someone else may have locked the door. You just refuse to stay outside.</p>
+      <blockquote class="pull-quote">You cannot always control what happens to you, but you can develop control over how you respond.</blockquote>
+      <p>The biggest difference is where your attention goes. A victimhood mindset looks at what is outside your control, such as other people, the past, and bad luck. An ownership mindset looks at what is within your control, such as your next action, your attitude, and your words.</p>
+      <p>Here is what people often get wrong. Ownership does not mean you accept blame for everything. It does not mean you tolerate mistreatment. It does not mean you pretend unfair things never happen. You can say, “That was unfair,” and still ask, “What will I do now?” Also, explaining a problem is not the same as making an excuse. An explanation tells what happened. An excuse hides behind it.</p>
+
+      <div class="micro-check" data-check-id="section-02-mc1">
+        <p class="micro-check-label">Quick Check</p>
+        <p class="micro-check-q">Which statement is true about an ownership mindset?</p>
+        <div class="micro-check-options">
+          <button class="micro-check-option" data-option-id="a">It means tolerating mistreatment</button>
+          <button class="micro-check-option" data-option-id="b">It means pretending unfair things never happen</button>
+          <button class="micro-check-option" data-correct="true" data-option-id="c">It means you can admit unfairness and still own your response</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 03 ===== -->
+  <section id="section-03" aria-labelledby="s03-h">
+    <div class="section-inner">
+      <div class="section-label">Section 03</div>
+      <h2 id="s03-h">The Core Framework</h2>
+      <p>Mindsets feel vague until you can name their parts. These four parts work like the legs of a table. If one is weak, the whole habit wobbles. Tap each part to read why it matters, what it is, and how to use it.</p>
+
+      <div class="tactic-card" id="comp-focus-on-control" tabindex="0" role="button" aria-expanded="false">
+        <div class="tactic-header"><span class="tactic-tag">Core Framework</span><h3>Focus on Control</h3><span class="tactic-chevron" aria-hidden="true">⌄</span></div>
+        <div class="tactic-body">
+          <p><span class="tb-label">Why</span>Your energy is limited, so where you spend it decides what you can finish.</p>
+          <p><span class="tb-label">What</span>Sort every problem into three groups: what you can control, what you can influence, and what you cannot control. Victimhood stares at the third group. Ownership starts with the first two.</p>
+          <p><span class="tb-label">Example</span>A job applicant is rejected. She cannot control the hiring manager’s decision. She can control her résumé, her practice interviews, and her next application.</p>
+          <p><span class="tb-label">How</span>Before you react, ask, “Which group is this in?”</p>
+        </div>
+      </div>
+
+      <div class="tactic-card" id="comp-honest-self-talk" tabindex="0" role="button" aria-expanded="false">
+        <div class="tactic-header"><span class="tactic-tag">Core Framework</span><h3>Honest Self-Talk</h3><span class="tactic-chevron" aria-hidden="true">⌄</span></div>
+        <div class="tactic-body">
+          <p><span class="tb-label">Why</span>The words you say to yourself decide the choice you make next.</p>
+          <p><span class="tb-label">What</span>Victimhood self-talk sounds like “It’s not my fault” and “There’s nothing I can do.” Ownership self-talk sounds like “What could I have done better?” and “What’s my next possible action?”</p>
+          <p><span class="tb-label">Example</span>A student fails an exam. One thinks, “The teacher is unfair.” Another thinks, “Which topics did I skip?” The second student now has something to work on.</p>
+          <p><span class="tb-label">How</span>Catch one victim sentence today and rewrite it as a question.</p>
+        </div>
+      </div>
+
+      <div class="tactic-card" id="comp-mistakes-as-lessons" tabindex="0" role="button" aria-expanded="false">
+        <div class="tactic-header"><span class="tactic-tag">Core Framework</span><h3>Mistakes as Lessons</h3><span class="tactic-chevron" aria-hidden="true">⌄</span></div>
+        <div class="tactic-body">
+          <p><span class="tb-label">Why</span>Every person fails. What matters is what you do with the failure.</p>
+          <p><span class="tb-label">What</span>A victimhood mindset blames people and makes excuses. An ownership mindset admits the mistake, fixes it, and learns from it.</p>
+          <p><span class="tb-label">Example</span>A worker sends the wrong file to a client. He can blame unclear instructions. Or he can say, “That was my error. Here is the right file, and here is how I will check next time.”</p>
+          <p><span class="tb-label">How</span>Own it fast: admit it, correct it, learn from it.</p>
+        </div>
+      </div>
+
+      <div class="tactic-card" id="comp-initiative" tabindex="0" role="button" aria-expanded="false">
+        <div class="tactic-header"><span class="tactic-tag">Core Framework</span><h3>Initiative</h3><span class="tactic-chevron" aria-hidden="true">⌄</span></div>
+        <div class="tactic-body">
+          <p><span class="tb-label">Why</span>Waiting feels safe, but it hands your progress to someone else.</p>
+          <p><span class="tb-label">What</span>A victimhood mindset waits for others to fix things or give instructions. An ownership mindset asks questions, offers solutions, and starts with what is available.</p>
+          <p><span class="tb-label">Example</span>A new employee does not understand a task. One says, “Nobody told me what to do.” The other says, “I do not understand this part. Can you show me?”</p>
+          <p><span class="tb-label">How</span>When you bring a problem, bring one possible solution with it.</p>
+        </div>
+      </div>
+
+      <div class="micro-check" data-check-id="section-03-mc1">
+        <p class="micro-check-label">Quick Check</p>
+        <p class="micro-check-q">Sorting a problem into “control, influence, cannot control” belongs to which part?</p>
+        <div class="micro-check-options">
+          <button class="micro-check-option" data-correct="true" data-option-id="a">Focus on Control</button>
+          <button class="micro-check-option" data-option-id="b">Initiative</button>
+          <button class="micro-check-option" data-option-id="c">Honest Self-Talk</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 04 ===== -->
+  <section id="section-04" aria-labelledby="s04-h">
+    <div class="section-inner">
+      <div class="section-label">Section 04</div>
+      <h2 id="s04-h">How It Works</h2>
+      <p>Why do two people react so differently to the same problem? The answer is a small chain of events that happens in seconds. When you can see the chain, you can step into it.</p>
+
+      <div class="flow">
+        <div class="concept-card">
+          <div class="cc-step">Step 1</div>
+          <h3>Something Goes Wrong</h3>
+          <p>A mistake, an unfair word, or a closed door lands on you. Anger, frustration, or disappointment rises fast. This is normal. The trouble starts when those feelings make the next decision for you. A short pause gives the choice back to you.</p>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">↓</div>
+        <div class="concept-card">
+          <div class="cc-step">Step 2</div>
+          <h3>A Story Gets Chosen</h3>
+          <p>In that pause, your mind picks a story. The victim story says, “This was done to me, so none of it is on me.” The owner story says, “This happened. What is my part, and what is my next step?” Look at the parable of the talents. The servant with one talent said, “I knew thee that thou art an hard man,” then buried what he was given (Matthew 25:24–25).</p>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">↓</div>
+        <div class="concept-card">
+          <div class="cc-step">Step 3</div>
+          <h3>A Loop Begins</h3>
+          <p>Each story leads to actions, and actions lead to results. Blame brings defensiveness, so you learn nothing and the problem returns. Ownership brings feedback, so you improve and people trust you. Each round makes the next round easier, in either direction.</p>
+        </div>
+      </div>
+
+      <blockquote class="section-quote">
+        <svg class="quote-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7c-2 0-4 2-4 5v5h5v-5H6c0-2 1-3 3-3zm10 0c-2 0-4 2-4 5v5h5v-5h-2c0-2 1-3 3-3z"/></svg>
+        <p class="quote-text">“He that covereth his sins shall not prosper: but whoso confesseth and forsaketh them shall have mercy.”</p>
+        <cite class="quote-attribution">— Proverbs 28:13 (KJV)</cite>
+      </blockquote>
+
+      <div class="micro-check" data-check-id="section-04-mc1">
+        <p class="micro-check-label">Quick Check</p>
+        <p class="micro-check-q">What decides your next action after something goes wrong?</p>
+        <div class="micro-check-options">
+          <button class="micro-check-option" data-option-id="a">The size of the problem</button>
+          <button class="micro-check-option" data-option-id="b">How loud other people are</button>
+          <button class="micro-check-option" data-correct="true" data-option-id="c">The story you tell yourself in that moment</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 05 ===== -->
+  <section id="section-05" aria-labelledby="s05-h">
+    <div class="section-inner">
+      <div class="section-label">Section 05</div>
+      <h2 id="s05-h">How to Apply It Daily</h2>
+      <p>Knowing the difference is not enough. Mindsets change through small habits, repeated every day. Here are six habits to start today. Tap the tag on each habit to jump to the part of the framework it builds.</p>
+
+      <div class="action-grid">
+        <div class="action-card">
+          <span class="action-icon" aria-hidden="true">☀️</span>
+          <span class="action-title">Ask the morning question</span>
+          <p>Each morning, ask, “What can I take responsibility for today?” Each night, review where you showed ownership and where you avoided it.</p>
+          <a class="applies-to-tag" href="#comp-focus-on-control">↳ Applies: Focus on Control</a>
+        </div>
+        <div class="action-card">
+          <span class="action-icon" aria-hidden="true">🗂️</span>
+          <span class="action-title">Sort what you can control</span>
+          <p>Write your worry in three groups: control, influence, and cannot control. Then put your energy into the first two.</p>
+          <a class="applies-to-tag" href="#comp-focus-on-control">↳ Applies: Focus on Control</a>
+        </div>
+        <div class="action-card">
+          <span class="action-icon" aria-hidden="true">🔁</span>
+          <span class="action-title">Swap blaming for reflection</span>
+          <p>When something goes wrong, ask, “What can I learn from this?” before you ask who caused it.</p>
+          <a class="applies-to-tag" href="#comp-honest-self-talk">↳ Applies: Honest Self-Talk</a>
+        </div>
+        <div class="action-card">
+          <span class="action-icon" aria-hidden="true">🙋</span>
+          <span class="action-title">Own mistakes immediately</span>
+          <p>Admit the mistake, correct it, and learn from it on the same day, before the excuses have time to form.</p>
+          <a class="applies-to-tag" href="#comp-mistakes-as-lessons">↳ Applies: Mistakes as Lessons</a>
+        </div>
+        <div class="action-card">
+          <span class="action-icon" aria-hidden="true">💬</span>
+          <span class="action-title">Bring a solution with every problem</span>
+          <p>When you complain or report a problem, add at least one possible fix. If you have none, ask for ideas.</p>
+          <a class="applies-to-tag" href="#comp-initiative">↳ Applies: Initiative</a>
+        </div>
+        <div class="action-card">
+          <span class="action-icon" aria-hidden="true">🚀</span>
+          <span class="action-title">Start with what you have</span>
+          <p>Stop waiting for perfect conditions. Take the first small step today, and ask for feedback along the way.</p>
+          <a class="applies-to-tag" href="#comp-initiative">↳ Applies: Initiative</a>
+        </div>
+      </div>
+
+      <div class="control-map">
+        <h3>Try it now: Your Control Map</h3>
+        <p>Think of what is worrying you today. Count how many items fit in each group, and the chart will show where your energy is going.</p>
+        <div class="cm-inputs">
+          <label for="ctl-control">Can control<input type="number" id="ctl-control" min="0" max="99" inputmode="numeric" placeholder="0"></label>
+          <label for="ctl-influence">Can influence<input type="number" id="ctl-influence" min="0" max="99" inputmode="numeric" placeholder="0"></label>
+          <label for="ctl-cannot">Cannot control<input type="number" id="ctl-cannot" min="0" max="99" inputmode="numeric" placeholder="0"></label>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chart-control" data-source="Reader's own input" role="img" aria-label="Doughnut chart showing how many of the reader's worries they can control, influence, or cannot control"></canvas>
+        </div>
+        <p id="control-readout" aria-live="polite"></p>
+      </div>
+
+      <div class="micro-check" data-check-id="section-05-mc1">
+        <p class="micro-check-label">Quick Check</p>
+        <p class="micro-check-q">When you notice yourself complaining, what does this guide suggest?</p>
+        <div class="micro-check-options">
+          <button class="micro-check-option" data-option-id="a">Complain once more to be sure</button>
+          <button class="micro-check-option" data-correct="true" data-option-id="b">Name at least one possible solution</button>
+          <button class="micro-check-option" data-option-id="c">Ignore the problem</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 06 ===== -->
+  <section id="section-06" aria-labelledby="s06-h">
+    <div class="section-inner">
+      <div class="section-label">Section 06</div>
+      <h2 id="s06-h">Benefits &amp; Consequences</h2>
+      <p>Why do these habits matter in the long run? Because mindsets work like seeds. Small choices repeated for years grow into a pattern, and a pattern grows into a life.</p>
+
+      <div class="contrast-grid">
+        <div class="contrast-col good">
+          <h3>Over time, ownership brings</h3>
+          <div class="c-item"><span class="c-dot"></span><div><strong>Steady progress.</strong> Small owned actions add up, so your life moves forward even when conditions are not perfect.</div></div>
+          <div class="c-item"><span class="c-dot"></span><div><strong>A trusted name.</strong> People rely on someone who keeps commitments and admits mistakes, so doors open.</div></div>
+          <div class="c-item"><span class="c-dot"></span><div><strong>Faster learning.</strong> Mistakes become lessons, so the same error appears less each year.</div></div>
+          <div class="c-item"><span class="c-dot"></span><div><strong>Inner peace.</strong> When you stop fighting what you cannot change, you have calm energy for what you can.</div></div>
+        </div>
+        <div class="contrast-col bad">
+          <h3>Over time, victimhood brings</h3>
+          <div class="c-item"><span class="c-dot"></span><div><strong>Stuck patterns.</strong> Blame and excuses keep the lesson out, so the same problem returns in new forms.</div></div>
+          <div class="c-item"><span class="c-dot"></span><div><strong>Strained relationships.</strong> People tire of constant complaints and blame, so trust slowly weakens.</div></div>
+          <div class="c-item"><span class="c-dot"></span><div><strong>Lost opportunities.</strong> Waiting for perfect conditions or rescue means chances pass while nothing is started.</div></div>
+          <div class="c-item"><span class="c-dot"></span><div><strong>Growing bitterness.</strong> Dwelling on what is unfair can harden the heart, and a hard heart sees fewer ways forward.</div></div>
+        </div>
+      </div>
+
+      <blockquote class="section-quote q2">
+        <svg class="quote-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7c-2 0-4 2-4 5v5h5v-5H6c0-2 1-3 3-3zm10 0c-2 0-4 2-4 5v5h5v-5h-2c0-2 1-3 3-3z"/></svg>
+        <p class="quote-text">“For every man shall bear his own burden.”</p>
+        <cite class="quote-attribution">— Galatians 6:5 (KJV)</cite>
+      </blockquote>
+
+      <div class="micro-check" data-check-id="section-06-mc1">
+        <p class="micro-check-label">Quick Check</p>
+        <p class="micro-check-q">Which is a long-term benefit of an ownership mindset?</p>
+        <div class="micro-check-options">
+          <button class="micro-check-option" data-correct="true" data-option-id="a">A reputation for being dependable</button>
+          <button class="micro-check-option" data-option-id="b">Never making mistakes</button>
+          <button class="micro-check-option" data-option-id="c">Never facing unfair situations</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 07 ===== -->
+  <section id="section-07" aria-labelledby="s07-h">
+    <div class="section-inner">
+      <div class="section-label">Section 07</div>
+      <h2 id="s07-h">Narrative Examples</h2>
+      <p>Why watch people in action? Because it is easier to spot a habit when you hear it spoken. In each scene, the problem is the same. Only the speaker’s move changes.</p>
+
+      <div class="story-scene">
+        <h3 style="font-size:1.05rem; margin-bottom:6px;">Scene 1 — The Late Report (Office)</h3>
+        <p class="scene-setup">Mia’s report was due at noon. At 2 p.m., it is still not sent.</p>
+        <div class="scene-block wrong">
+          <div class="scene-label wrong-label">🚫 The Wrong Way</div>
+          <p class="dialogue-line"><span class="speaker">Boss:</span> “Mia, where is the report?”</p>
+          <p class="dialogue-line"><span class="speaker">Mia:</span> “Nobody told me the deadline moved. And the files were a mess.”</p>
+          <p class="dialogue-line" style="opacity:.75;"><em>The boss sighs. The report stays late.</em></p>
+          <div class="scene-note"><strong>What went wrong:</strong> Mia explained the problem to avoid it. She skipped the part she could control.</div>
+        </div>
+        <div class="scene-block right">
+          <div class="scene-label right-label">✅ The Right Way</div>
+          <p class="dialogue-line"><span class="speaker">Mia:</span> “It’s late, and that’s on me. I should have confirmed the deadline. I can send it in thirty minutes.”</p>
+          <p class="dialogue-line" style="opacity:.75;"><em>The boss nods. “Thank you. Let’s fix the process together.”</em></p>
+          <div class="scene-note"><strong>Why this works:</strong> She named her part, offered a next step, and invited a fix for next time.
+            <div class="scene-tags"><a class="applies-to-tag" href="#comp-mistakes-as-lessons">↳ Mistakes as Lessons</a><a class="applies-to-tag" href="#comp-initiative">↳ Initiative</a></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="story-scene">
+        <h3 style="font-size:1.05rem; margin-bottom:6px;">Scene 2 — The Harsh Words (Home)</h3>
+        <p class="scene-setup">Dad had a stressful day at work. At home, he snaps at his son.</p>
+        <div class="scene-block wrong">
+          <div class="scene-label wrong-label">🚫 The Wrong Way</div>
+          <p class="dialogue-line"><span class="speaker">Dad:</span> “You made me angry. If you listened the first time, I wouldn’t yell.”</p>
+          <p class="dialogue-line" style="opacity:.75;"><em>His son goes quiet and walks away.</em></p>
+          <div class="scene-note"><strong>What went wrong:</strong> Dad handed his reaction to someone else. His anger became the boy’s fault.</div>
+        </div>
+        <div class="scene-block right">
+          <div class="scene-label right-label">✅ The Right Way</div>
+          <p class="dialogue-line"><span class="speaker">Dad:</span> “I raised my voice, and that was wrong. You didn’t deserve that. I had a hard day, but handling it is my job. I’m sorry.”</p>
+          <p class="dialogue-line" style="opacity:.75;"><em>His son looks up. “Okay, Dad.”</em></p>
+          <div class="scene-note"><strong>Why this works:</strong> Dad admitted the hard day was real, yet he owned his response.
+            <div class="scene-tags"><a class="applies-to-tag" href="#comp-focus-on-control">↳ Focus on Control</a><a class="applies-to-tag" href="#comp-honest-self-talk">↳ Honest Self-Talk</a></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="story-scene">
+        <h3 style="font-size:1.05rem; margin-bottom:6px;">Scene 3 — The Broken Order (Customer Service)</h3>
+        <p class="scene-setup">A customer says her order arrived broken. Ben did not pack it.</p>
+        <div class="scene-block wrong">
+          <div class="scene-label wrong-label">🚫 The Wrong Way</div>
+          <p class="dialogue-line"><span class="speaker">Ben:</span> “That’s not my department. The packers always do this.”</p>
+          <p class="dialogue-line" style="opacity:.75;"><em>The customer leaves, frustrated, with a broken item.</em></p>
+          <div class="scene-note"><strong>What went wrong:</strong> Ben was right that it was not his fault. But he stopped at blame and did nothing.</div>
+        </div>
+        <div class="scene-block right">
+          <div class="scene-label right-label">✅ The Right Way</div>
+          <p class="dialogue-line"><span class="speaker">Ben:</span> “I’m sorry about that. I didn’t pack it, but I’ll own fixing it. I’ll send a replacement today and ask the team to check the boxes.”</p>
+          <p class="dialogue-line" style="opacity:.75;"><em>The customer relaxes. “Thank you.”</em></p>
+          <div class="scene-note"><strong>Why this works:</strong> The fault was not his, but the response was. He acted instead of waiting.
+            <div class="scene-tags"><a class="applies-to-tag" href="#comp-focus-on-control">↳ Focus on Control</a><a class="applies-to-tag" href="#comp-initiative">↳ Initiative</a></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="micro-check" data-check-id="section-07-mc1">
+        <p class="micro-check-label">Quick Check</p>
+        <p class="micro-check-q">In the late report scene, which line shows ownership?</p>
+        <div class="micro-check-options">
+          <button class="micro-check-option" data-option-id="a">“Nobody told me the deadline moved.”</button>
+          <button class="micro-check-option" data-option-id="b">“The files were a mess.”</button>
+          <button class="micro-check-option" data-correct="true" data-option-id="c">“It’s late, and that’s on me.”</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 08 ===== -->
+  <section id="section-08" aria-labelledby="s08-h">
+    <div class="section-inner">
+      <div class="section-label">Section 08</div>
+      <h2 id="s08-h">Real-World Examples</h2>
+      <p>Why look at real people? Because ideas are easier to trust when you see them lived. These three people all appear in Scripture. Tap a card to read their story.</p>
+
+      <div class="story-grid">
+        <div class="story-card" id="story-adam">
+          <div class="story-card-header">
+            <span class="story-avatar" aria-hidden="true">🍎</span>
+            <span class="story-name">Adam &amp; Eve</span>
+            <span class="story-trait">PASSING THE BLAME</span>
+          </div>
+          <p class="story-hook">God asked a simple question in the garden. The answers pointed everywhere except at the speaker.</p>
+          <button class="story-toggle" aria-expanded="false">Read their story →</button>
+          <div class="story-full">
+            <p>After eating the forbidden fruit, Adam and Eve heard God walking in the garden, and they hid. God asked Adam if he had eaten from the tree. It was a chance to say, “Yes, I did.”</p>
+            <p>Instead, Adam answered, “The woman whom thou gavest to be with me, she gave me of the tree, and I did eat” (Genesis 3:12). Look at how the sentence is built. First he points to the woman. Then he points, quietly, to God who gave her. Only at the very end does he say, “I did eat.”</p>
+            <p>God then asked Eve what she had done. She answered, “The serpent beguiled me, and I did eat” (Genesis 3:13). Her answer follows the same pattern. Notice that both facts were true. Eve did give the fruit, and the serpent did deceive her. Explaining is not always lying.</p>
+            <p>The problem is the order. Both of them put the explanation first and the ownership last. Their first words went to what was outside their control. The words that mattered most came at the end.</p>
+            <p>Here is the lesson. In any hard moment, we can ask which part of the story is ours. Adam and Eve could not undo the serpent’s trick. But they could control their answer to God. Ownership begins when the first sentence names our part.</p>
+          </div>
+        </div>
+
+        <div class="story-card" id="story-joseph">
+          <div class="story-card-header">
+            <span class="story-avatar" aria-hidden="true">🧥</span>
+            <span class="story-name">Joseph</span>
+            <span class="story-trait">OWNING HIS RESPONSE</span>
+          </div>
+          <p class="story-hook">Joseph was sold by his brothers and later jailed for something he did not do. Yet at every step, he kept choosing what he could do.</p>
+          <button class="story-toggle" aria-expanded="false">Read their story →</button>
+          <div class="story-full">
+            <p>Joseph was seventeen when his brothers sold him (Genesis 37:2). He ended up in Egypt as a slave. Later, he was falsely accused and thrown into prison. If anyone had a reason to say, “There’s nothing I can do,” it was Joseph.</p>
+            <p>But Genesis shows a man who kept working. In his master’s house, he served so well that he was put in charge of it. In prison, the keeper trusted him with the other prisoners. He did not wait for his situation to become fair first.</p>
+            <p>Joseph was thirty years old when he stood before Pharaoh (Genesis 41:46). About thirteen years had passed since he was sold. Years of small, faithful choices had moved him from a pit to a palace.</p>
+            <p>Later, his brothers feared he would take revenge. Joseph did not pretend the harm never happened. He said, “Ye thought evil against me; but God meant it unto good, to bring to pass, as it is this day, to save much people alive” (Genesis 50:20). Then he promised to care for them, and “he comforted them, and spake kindly unto them” (Genesis 50:21).</p>
+            <p>Joseph shows the key principle of this lesson. He named the wrong. He did not blame himself for it. Yet he refused to let the wrong decide who he became. He could not control his brothers’ actions, but he owned his response.</p>
+          </div>
+        </div>
+
+        <div class="story-card" id="story-nehemiah">
+          <div class="story-card-header">
+            <span class="story-avatar" aria-hidden="true">🧱</span>
+            <span class="story-name">Nehemiah</span>
+            <span class="story-trait">TAKING INITIATIVE</span>
+          </div>
+          <p class="story-hook">Nehemiah was a cupbearer far from home when he heard that Jerusalem’s walls lay broken. He did not wait for someone else to fix it.</p>
+          <button class="story-toggle" aria-expanded="false">Read their story →</button>
+          <div class="story-full">
+            <p>Nehemiah served the king as his cupbearer. One day, his brother Hanani and some men from Judah brought bad news. The wall of Jerusalem was broken down, and its gates were burned with fire (Nehemiah 1:3).</p>
+            <p>Nehemiah could have said, “That is sad, but it is not my problem.” Instead, he sat down, wept, fasted, and prayed. In his prayer, he confessed sin, and he did not only point at others. He said, “both I and my father’s house have sinned” (Nehemiah 1:6).</p>
+            <p>Then he took action with what he had. He asked the king for permission and supplies. He inspected the broken walls himself. He called the people to rise up and build together.</p>
+            <p>Enemies soon mocked and threatened the builders. Nehemiah did not blame them and quit. The Bible says, “Nevertheless we made our prayer unto our God, and set a watch against them day and night” (Nehemiah 4:9). He prayed, and he also posted guards.</p>
+            <p>The wall was finished “in fifty and two days” (Nehemiah 6:15). Nehemiah did not control the ruined wall, the enemies, or the distance from home. He controlled his next action, again and again. That is ownership in motion.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="micro-check" data-check-id="section-08-mc1">
+        <p class="micro-check-label">Quick Check</p>
+        <p class="micro-check-q">Joseph named the harm done to him. What did he still do?</p>
+        <div class="micro-check-options">
+          <button class="micro-check-option" data-option-id="a">Pretended nothing had happened</button>
+          <button class="micro-check-option" data-correct="true" data-option-id="b">Responded with kindness and care</button>
+          <button class="micro-check-option" data-option-id="c">Took revenge on his brothers</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 09 ===== -->
+  <section id="section-09" aria-labelledby="s09-h">
+    <div class="section-inner">
+      <div class="section-label">Section 09</div>
+      <h2 id="s09-h">One-Sentence Summary</h2>
+      <p>If you remember only one line from this guide, make it this one.</p>
+      <div class="summary-banner">
+        <p class="summary-sentence">Ownership is not about being responsible for everything; it is about refusing to surrender your ability to make things better, so spend your energy on what you can do, not on proving it was not your fault.</p>
+        <p class="summary-today">Today: ask yourself, “What can I take responsibility for?”</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 10 ===== -->
+  <section id="section-10" aria-labelledby="s10-h">
+    <div class="section-inner">
+      <div class="section-label">Section 10</div>
+      <h2 id="s10-h">Quiz</h2>
+      <p>Why take a quiz? Because remembering something on purpose makes it stick. Fifteen questions, one at a time. Explanations for any misses appear at the end.</p>
+
+      <div id="quiz-stepper">
+        <div id="quiz-progress-bar">
+          <span id="quiz-progress-text">Question <span id="quiz-current-num">1</span> of 15</span>
+          <span class="quiz-progress-sep">·</span>
+          <span id="quiz-score-display">Score: <span id="quiz-score">0</span>/15</span>
+        </div>
+        <div id="quiz-card-viewport">
+
+          <div class="quiz-card" data-question="0" data-tests-id="section-02" data-tests-label="What Is It?">
+            <p class="quiz-q-text">Which sentence best describes a victimhood mindset?</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-option-id="a">Accepting blame for everything that goes wrong</button>
+              <button class="quiz-option" data-correct="true" data-option-id="b">Focusing on what happened to you, who is responsible, and why you cannot do anything about it</button>
+              <button class="quiz-option" data-option-id="c">Admitting mistakes quickly and learning from them</button>
+              <button class="quiz-option" data-option-id="d">Refusing to ever feel angry or hurt</button>
+            </div>
+            <div class="quiz-explanation" hidden>A victimhood mindset is the habit of looking at what happened and who is to blame, while believing nothing can be done. Taking all the blame is a different mistake, and admitting mistakes quickly is actually part of ownership.</div>
+          </div>
+
+          <div class="quiz-card" data-question="1" data-tests-id="section-02" data-tests-label="What Is It?" hidden>
+            <p class="quiz-q-text">What is the biggest difference between the two mindsets?</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-option-id="a">One is for leaders and the other is for followers</button>
+              <button class="quiz-option" data-option-id="b">One mindset feels emotions and the other does not</button>
+              <button class="quiz-option" data-option-id="c">One mindset has better circumstances</button>
+              <button class="quiz-option" data-correct="true" data-option-id="d">One focuses on what is outside your control, and the other on what is within it</button>
+            </div>
+            <div class="quiz-explanation" hidden>The biggest difference is focus. Victimhood watches what is outside your control, while ownership watches what is within it. Both people can feel strong emotions and face hard circumstances, so those do not separate the two mindsets.</div>
+          </div>
+
+          <div class="quiz-card" data-question="2" data-tests-id="section-02" data-tests-label="What Is It?" hidden>
+            <p class="quiz-q-text">An ownership mindset means accepting responsibility for your…</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-correct="true" data-option-id="a">choices, actions, and responses, even when the situation is not your fault</button>
+              <button class="quiz-option" data-option-id="b">circumstances and the actions of everyone around you</button>
+              <button class="quiz-option" data-option-id="c">feelings only, never your actions</button>
+              <button class="quiz-option" data-option-id="d">past mistakes, but never your future decisions</button>
+            </div>
+            <div class="quiz-explanation" hidden>Ownership means taking responsibility for your own choices, actions, and responses, even when the situation is not your fault. It does not mean owning other people’s behavior or blaming yourself for things outside your control.</div>
+          </div>
+
+          <div class="quiz-card" data-question="3" data-tests-id="comp-focus-on-control" data-tests-label="Focus on Control" hidden>
+            <p class="quiz-q-text">A job applicant is rejected. Which response shows Focus on Control?</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-option-id="a">Complain that the hiring manager was unfair and stop applying</button>
+              <button class="quiz-option" data-option-id="b">Wait for the company to change its mind</button>
+              <button class="quiz-option" data-correct="true" data-option-id="c">Improve her résumé and practice interviews for the next application</button>
+              <button class="quiz-option" data-option-id="d">Compare herself with the candidates who were hired</button>
+            </div>
+            <div class="quiz-explanation" hidden>She cannot control the manager’s decision, but she can control her résumé, her practice, and her next application. Complaining, waiting, and comparing all keep her attention on things outside her control.</div>
+          </div>
+
+          <div class="quiz-card" data-question="4" data-tests-id="comp-honest-self-talk" data-tests-label="Honest Self-Talk" hidden>
+            <p class="quiz-q-text">Which self-talk sounds like an ownership mindset?</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-option-id="a">“There’s nothing I can do about it.”</button>
+              <button class="quiz-option" data-correct="true" data-option-id="b">“What’s my next possible action?”</button>
+              <button class="quiz-option" data-option-id="c">“Nobody told me what to do.”</button>
+              <button class="quiz-option" data-option-id="d">“Why should I change when everyone else is wrong?”</button>
+            </div>
+            <div class="quiz-explanation" hidden>Asking “What’s my next possible action?” turns your attention to something you can do. The other sentences avoid responsibility, deny that anything can change, or blame others.</div>
+          </div>
+
+          <div class="quiz-card" data-question="5" data-tests-id="comp-mistakes-as-lessons" data-tests-label="Mistakes as Lessons" hidden>
+            <p class="quiz-q-text">A worker sends the wrong file to a client. What is the ownership response?</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-option-id="a">Blame the unclear instructions</button>
+              <button class="quiz-option" data-option-id="b">Hope the client does not notice</button>
+              <button class="quiz-option" data-option-id="c">Wait for the boss to fix it</button>
+              <button class="quiz-option" data-correct="true" data-option-id="d">Admit it, send the correct file, and plan how to avoid it next time</button>
+            </div>
+            <div class="quiz-explanation" hidden>Ownership admits the error, fixes it, and learns from it. Blaming instructions, hoping nobody notices, and waiting for the boss all avoid the lesson.</div>
+          </div>
+
+          <div class="quiz-card" data-question="6" data-tests-id="comp-initiative" data-tests-label="Initiative" hidden>
+            <p class="quiz-q-text">A new employee does not understand a task. Which response shows initiative?</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-correct="true" data-option-id="a">“I do not understand this part. Can you show me?”</button>
+              <button class="quiz-option" data-option-id="b">“Nobody told me what to do.”</button>
+              <button class="quiz-option" data-option-id="c">Wait quietly until someone notices</button>
+              <button class="quiz-option" data-option-id="d">Guess at the task and blame others if it goes wrong</button>
+            </div>
+            <div class="quiz-explanation" hidden>Asking for help when you do not understand is initiative. Staying silent, saying nobody told you, or guessing and then blaming others all keep you waiting for someone else.</div>
+          </div>
+
+          <div class="quiz-card" data-question="7" data-tests-id="section-04" data-tests-label="How It Works" hidden>
+            <p class="quiz-q-text">After something goes wrong, what decides whether you act like a victim or an owner?</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-option-id="a">How bad the event was</button>
+              <button class="quiz-option" data-option-id="b">How much money you have</button>
+              <button class="quiz-option" data-correct="true" data-option-id="c">The story you choose to tell yourself in that moment</button>
+              <button class="quiz-option" data-option-id="d">Whether other people agree with you</button>
+            </div>
+            <div class="quiz-explanation" hidden>When a problem hits, feelings rise and your mind picks a story. That story, victim or owner, shapes the actions that follow. The size of the problem, your money, or other people’s agreement does not decide it.</div>
+          </div>
+
+          <div class="quiz-card" data-question="8" data-tests-id="section-01" data-tests-label="Why This Matters" hidden>
+            <p class="quiz-q-text">According to Section 01, what is the real cost of a victimhood mindset?</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-option-id="a">You become too responsible for other people’s problems</button>
+              <button class="quiz-option" data-option-id="b">You spend too much time looking for solutions</button>
+              <button class="quiz-option" data-option-id="c">You receive too much feedback from others</button>
+              <button class="quiz-option" data-correct="true" data-option-id="d">You spend your energy on things you cannot change while the problem stays where it was</button>
+            </div>
+            <div class="quiz-explanation" hidden>The cost is wasted energy. Time spent on things you cannot change leaves you tired and bitter, and the problem is still there. Looking for solutions and receiving feedback are habits of ownership, not costs.</div>
+          </div>
+
+          <div class="quiz-card" data-question="9" data-tests-id="section-05" data-tests-label="How to Apply It Daily" hidden>
+            <p class="quiz-q-text">When you notice yourself complaining, what does this guide suggest?</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-option-id="a">Complain louder until someone listens</button>
+              <button class="quiz-option" data-correct="true" data-option-id="b">Name at least one possible solution</button>
+              <button class="quiz-option" data-option-id="c">Stop talking to people</button>
+              <button class="quiz-option" data-option-id="d">Wait until the feeling passes</button>
+            </div>
+            <div class="quiz-explanation" hidden>The guide pairs every complaint with at least one possible fix. Complaining louder, going silent, or waiting keeps you in the same place.</div>
+          </div>
+
+          <div class="quiz-card" data-question="10" data-tests-id="section-06" data-tests-label="Benefits &amp; Consequences" hidden>
+            <p class="quiz-q-text">Which result is most connected with a victimhood mindset over time?</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-correct="true" data-option-id="a">The same problem returns because no lesson was learned</button>
+              <button class="quiz-option" data-option-id="b">Faster learning from mistakes</button>
+              <button class="quiz-option" data-option-id="c">A trusted reputation</button>
+              <button class="quiz-option" data-option-id="d">Steady progress despite hard conditions</button>
+            </div>
+            <div class="quiz-explanation" hidden>Blame and excuses keep lessons out, so the same problem keeps coming back. Faster learning, trust, and steady progress are results of ownership.</div>
+          </div>
+
+          <div class="quiz-card" data-question="11" data-tests-id="section-07" data-tests-label="Narrative Examples" hidden>
+            <p class="quiz-q-text">In the broken-order scene, why was Ben’s second response an example of ownership?</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-option-id="a">He agreed to take the blame for the packing mistake</button>
+              <button class="quiz-option" data-option-id="b">He argued with the customer</button>
+              <button class="quiz-option" data-correct="true" data-option-id="c">He owned his response by promising a replacement and a follow-up</button>
+              <button class="quiz-option" data-option-id="d">He refused to help until his boss approved</button>
+            </div>
+            <div class="quiz-explanation" hidden>Ben did not pack the order, so he did not pretend it was his fault. He still owned his response by sending a replacement and asking the team to check the boxes. Ownership is not the same as taking blame.</div>
+          </div>
+
+          <div class="quiz-card" data-question="12" data-tests-id="story-adam" data-tests-label="Real-World Examples: Adam &amp; Eve" hidden>
+            <p class="quiz-q-text">In Genesis 3, what pattern do Adam and Eve’s answers show?</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-option-id="a">They both refused to answer</button>
+              <button class="quiz-option" data-option-id="b">They both blamed God and gave no other facts</button>
+              <button class="quiz-option" data-option-id="c">They both denied being in the garden</button>
+              <button class="quiz-option" data-correct="true" data-option-id="d">Each explained who else was involved before saying, “I did eat”</button>
+            </div>
+            <div class="quiz-explanation" hidden>Adam pointed to the woman, and Eve pointed to the serpent. Both put the explanation first and the ownership last. The facts they gave were true, but the order shows the blame pattern.</div>
+          </div>
+
+          <div class="quiz-card" data-question="13" data-tests-id="story-joseph" data-tests-label="Real-World Examples: Joseph" hidden>
+            <p class="quiz-q-text">What does Joseph’s story teach about ownership?</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-option-id="a">Unfair treatment must always be ignored</button>
+              <button class="quiz-option" data-correct="true" data-option-id="b">You can name the wrong done to you and still choose a constructive response</button>
+              <button class="quiz-option" data-option-id="c">Ownership means taking the blame for what your brothers did</button>
+              <button class="quiz-option" data-option-id="d">Waiting quietly is the best answer to injustice</button>
+            </div>
+            <div class="quiz-explanation" hidden>Joseph said plainly that his brothers meant evil, and he still responded with care and kindness. Ownership does not mean ignoring unfairness or taking blame that is not yours.</div>
+          </div>
+
+          <div class="quiz-card" data-question="14" data-tests-id="story-nehemiah" data-tests-label="Real-World Examples: Nehemiah" hidden>
+            <p class="quiz-q-text">How did Nehemiah show initiative?</p>
+            <div class="quiz-options">
+              <button class="quiz-option" data-correct="true" data-option-id="a">He prayed and confessed, asked the king for help, and led the people to start building</button>
+              <button class="quiz-option" data-option-id="b">He waited for the king to send builders</button>
+              <button class="quiz-option" data-option-id="c">He blamed his enemies and stopped the work</button>
+              <button class="quiz-option" data-option-id="d">He left Jerusalem to find an easier project</button>
+            </div>
+            <div class="quiz-explanation" hidden>Nehemiah did not wait for someone else. He prayed, asked the king for permission and supplies, and called the people to build. When enemies came, he prayed and posted guards instead of quitting.</div>
+          </div>
+
+        </div>
+        <div id="quiz-nav">
+          <button id="quiz-prev-btn" class="quiz-nav-btn" disabled>Previous</button>
+          <button id="quiz-next-btn" class="quiz-nav-btn quiz-nav-btn-primary" disabled>Next</button>
+        </div>
+      </div>
+
+      <div id="quiz-complete" class="quiz-complete" hidden>
+        <div class="quiz-complete-score">Score: <span id="quiz-final-score">0 / 15</span></div>
+        <p id="quiz-complete-message"></p>
+        <p id="quiz-growth-line"></p>
+        <div id="quiz-review-list"></div>
+        <button id="quiz-retake-btn" class="quiz-retake-btn">↺ Retake Quiz</button>
+        <button id="quiz-reset-btn" class="quiz-reset-btn">Reset Progress</button>
+      </div>
+
+      <div id="quiz-export-toolbar" class="quiz-export-toolbar">
+        <button id="quiz-export-blank-btn" class="quiz-export-btn">📄 Export Blank Exam (.docx)</button>
+        <button id="quiz-export-results-btn" class="quiz-export-btn" disabled>📝 Export My Results (.docx)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 11 ===== -->
+  <section id="section-11" aria-labelledby="s11-h">
+    <div class="section-inner">
+      <div class="section-label">Section 11</div>
+      <h2 id="s11-h">Disclaimer &amp; Sources</h2>
+      <div class="disclaimer-card">
+        <p>This guide is for educational purposes only.</p>
+        <p>Scripture quotations are from the King James Version (KJV).</p>
+        <p><strong>Sources</strong></p>
+        <ul>
+          <li>The Holy Bible, King James Version (public domain). Passages cited: Genesis 3:12–13; 37:2; 41:46; 50:20–21; Nehemiah 1:3–6; 4:9; 6:15; Matthew 25:24–25; Proverbs 28:13; Galatians 6:5.</li>
+          <li>“Victimhood Mindset vs. Ownership Mindset.” The lesson provided for this guide, reproduced in full in Section 12.</li>
+          <li>Based on established ideas in the study of personal responsibility and locus of control in psychology.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="heart-closing-card">
+    <p class="heart-closing-text">Did this guide help you?</p>
+    <button id="heart-toggle-bottom" class="heart-btn heart-btn-large" aria-label="Heart this guide" aria-pressed="false" title="Heart this guide">
+      <svg class="heart-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.7-4.35-9.3-8.1C.6 9.9 1.8 6 5.1 5c2-.6 3.9.2 5 1.8L12 8.5l1.9-1.7c1.1-1.6 3-2.4 5-1.8 3.3 1 4.5 4.9 2.4 7.9C18.7 16.65 12 21 12 21Z"/></svg>
+      <span>Heart this guide</span>
+    </button>
+  </div>
+
+  <!-- ===== SECTION 12 ===== -->
+  <section id="section-12" aria-labelledby="s12-h">
+    <div class="section-inner">
+      <div class="section-label">Section 12</div>
+      <h2 id="s12-h">Full Original Text (Verbatim)</h2>
+      <div class="verbatim-notice">The content below is reproduced exactly as provided, in full and unedited — it is the original source text this guide was built from, kept here as a standalone reference alongside the rewritten guide above.</div>
+      <div class="verbatim-body">
+        <h3>VICTIMHOOD MINDSET vs. OWNERSHIP MINDSET</h3>
+        <p>1. VICTIMHOOD MINDSET is the habit of focusing on what happened to you, who is responsible, and why you cannot do anything about it.</p>
+        <p>2. OWNERSHIP MINDSET is the habit of accepting responsibility for your choices, actions, and responses, even when circumstances are not your fault.</p>
+        <p>3. The biggest difference is that a victimhood mindset focuses on what is outside your control, while an ownership mindset focuses on what is within your control.</p>
+
+        <h3>COMPARISON:</h3>
+        <p><strong>VICTIMHOOD MINDSET:</strong></p>
+        <p>- "It's not my fault."</p>
+        <p>- "Nobody told me what to do."</p>
+        <p>- "My circumstances prevent me from succeeding."</p>
+        <p>- "Why should I change when everyone else is wrong?"</p>
+        <p>- "There's nothing I can do about it."</p>
+        <p>- Blames people instead of finding solutions.</p>
+        <p>- Makes excuses instead of learning lessons.</p>
+        <p>- Waits for others to fix problems.</p>
+        <p><strong>OWNERSHIP MINDSET:</strong></p>
+        <p>- "What could I have done better?"</p>
+        <p>- "If I don't understand, I'll ask."</p>
+        <p>- "How can I improve despite my circumstances?"</p>
+        <p>- "Even if others are wrong, what can I do?"</p>
+        <p>- "What's my next possible action?"</p>
+        <p>- Looks for solutions instead of excuses.</p>
+        <p>- Treats mistakes as opportunities to learn.</p>
+        <p>- Takes initiative instead of waiting.</p>
+
+        <h3>HOW TO AVOID VICTIMHOOD MINDSET THROUGH HABITS:</h3>
+        <p>1. Replace blaming with reflection: Whenever something goes wrong, ask, "What can I learn from this?"</p>
+        <p>2. Stop making automatic excuses: Recognize when you are explaining a problem versus avoiding responsibility.</p>
+        <p>3. Avoid excessive complaining: Whenever you complain, try to identify one possible solution.</p>
+        <p>4. Practice emotional control: Don't let anger, frustration, or disappointment dictate your decisions.</p>
+        <p>5. Stop comparing your circumstances with others: Focus on improving your own situation.</p>
+        <p>6. Accept uncomfortable truths: Be willing to acknowledge your mistakes, weaknesses, and poor decisions.</p>
+        <p>7. Avoid the habit of always seeking validation: Learn to do what is right even when nobody praises you.</p>
+        <p>8. Stop waiting for perfect conditions: Start with whatever resources and opportunities you currently have.</p>
+
+        <h3>HOW TO PRACTICE OWNERSHIP MINDSET THROUGH HABITS:</h3>
+        <p>1. Ask yourself every morning: "What can I take responsibility for today?"</p>
+        <p>2. Own your mistakes immediately: Admit them, correct them, and learn from them.</p>
+        <p>3. Take initiative: If you notice a problem, don't automatically wait for someone to tell you to fix it.</p>
+        <p>4. Focus on controllable factors: Separate what you can control, influence, and cannot control.</p>
+        <p>5. Make commitments and fulfill them: Build a reputation for being dependable.</p>
+        <p>6. Ask for feedback: Welcome constructive criticism instead of becoming defensive.</p>
+        <p>7. Think in solutions: When presenting a problem, also suggest at least one possible solution.</p>
+        <p>8. Review your day: Ask, "Where did I demonstrate ownership, and where did I avoid responsibility?"</p>
+
+        <h3>IMPORTANT PRINCIPLE:</h3>
+        <p>Having an ownership mindset DOES NOT mean accepting blame for everything, tolerating mistreatment, or pretending that unfair circumstances don't exist.</p>
+        <p>You can acknowledge that someone treated you unfairly while still taking ownership of how you respond.</p>
+        <p>You cannot always control what happens to you, but you can develop control over how you respond.</p>
+
+        <h3>THE MINDSET TO REMEMBER:</h3>
+        <p>"Don't waste your energy proving why something is not your fault; invest your energy in discovering what you can do about it."</p>
+        <p>Ownership is not about being responsible for everything; it is about refusing to surrender your ability to make things better.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button id="back-to-top" aria-label="Back to top">↑</button>
+<script>
+window.addEventListener('load', function () {
+
+  // ===== Progress persistence (self-deriving key, every storage call in try/catch) =====
+  const GUIDE_ID = location.pathname.split('/').pop().replace(/\.html$/, '') || 'index';
+  function saveProgress(partial) {
+    try {
+      const existing = JSON.parse(localStorage.getItem(GUIDE_ID) || '{}');
+      localStorage.setItem(GUIDE_ID, JSON.stringify({ ...existing, ...partial }));
+    } catch (e) { /* storage unavailable — fail silently */ }
+  }
+  function loadProgress() {
+    try { return JSON.parse(localStorage.getItem(GUIDE_ID) || 'null'); }
+    catch (e) { return null; }
+  }
+  function resetProgress() {
+    try { localStorage.removeItem(GUIDE_ID); } catch (e) {}
+  }
+
+  // ===== Shared scrollToAnchor =====
+  function scrollToAnchor(id, pulse) {
+    if (pulse === undefined) pulse = true;
+    const target = document.getElementById(id);
+    if (!target) return;
+    if (target.classList.contains('tactic-card') && !target.classList.contains('open')) {
+      target.classList.add('open');
+      target.setAttribute('aria-expanded', 'true');
+    }
+    if (target.classList.contains('story-card')) {
+      const full = target.querySelector('.story-full');
+      const tgl = target.querySelector('.story-toggle');
+      if (full && !full.classList.contains('open')) {
+        full.classList.add('open');
+        if (tgl) { tgl.setAttribute('aria-expanded', 'true'); tgl.textContent = '↑ Collapse'; }
+      }
+    }
+    const offset = 64;
+    const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top: top, behavior: 'smooth' });
+    if (pulse) {
+      target.classList.add('anchor-pulse');
+      setTimeout(function () { target.classList.remove('anchor-pulse'); }, 1200);
+    }
+  }
+  document.body.addEventListener('click', function (e) {
+    const link = e.target.closest('a.applies-to-tag[href^="#"]');
+    if (!link) return;
+    e.preventDefault();
+    scrollToAnchor(link.getAttribute('href').slice(1));
+  });
+
+  // ===== Reading time =====
+  function calcReadTime(el) {
+    const words = (el.innerText || '').trim().split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.round(words / 250));
+  }
+  const mainEl = document.getElementById('main');
+  if (mainEl) {
+    const totalMin = calcReadTime(mainEl);
+    const rtEl = document.getElementById('total-read-time');
+    if (rtEl) rtEl.textContent = '⏱ ~' + totalMin + ' min read';
+  }
+  document.querySelectorAll('section[id]').forEach(function (sec) {
+    const timeEl = document.getElementById('time-' + sec.id);
+    if (timeEl) timeEl.textContent = '~' + calcReadTime(sec) + 'm';
+  });
+
+  // ===== Reading bar + Back to top =====
+  const fill = document.getElementById('reading-bar-fill');
+  function updateReadingBar() {
+    const scrolled = window.scrollY;
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = total > 0 ? Math.round((scrolled / total) * 100) : 0;
+    fill.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', updateReadingBar);
+  updateReadingBar();
+  const topBtn = document.getElementById('back-to-top');
+  window.addEventListener('scroll', function () { topBtn.classList.toggle('show', window.scrollY > 400); });
+  topBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  // ===== Sidebar =====
+  function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sb-overlay').classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sb-overlay').classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('sb-close').addEventListener('click', closeSidebar);
+  document.getElementById('sb-overlay').addEventListener('click', closeSidebar);
+  document.getElementById('menu-btn').addEventListener('click', openSidebar);
+  document.getElementById('sb-nav').addEventListener('click', function (e) {
+    const link = e.target.closest('a[href]');
+    if (!link) return;
+    const href = link.getAttribute('href');
+    if (href && href[0] === '#') {
+      e.preventDefault();
+      scrollToAnchor(href.slice(1), false);
+      if (window.innerWidth <= 860) closeSidebar();
+    }
+  });
+
+  // ===== Search =====
+  const searchIndex = [
+    { id: 'section-01', label: 'Why This Matters', keywords: 'urgency cost why traffic blame freedom' },
+    { id: 'section-02', label: 'What Is It?', keywords: 'definition meaning victimhood ownership difference misconception' },
+    { id: 'section-03', label: 'The Core Framework', keywords: 'framework parts components' },
+    { id: 'comp-focus-on-control', label: 'Focus on Control (Core Framework)', keywords: 'control influence cannot control energy' },
+    { id: 'comp-honest-self-talk', label: 'Honest Self-Talk (Core Framework)', keywords: 'words thoughts questions' },
+    { id: 'comp-mistakes-as-lessons', label: 'Mistakes as Lessons (Core Framework)', keywords: 'blame excuses learn admit' },
+    { id: 'comp-initiative', label: 'Initiative (Core Framework)', keywords: 'waiting ask solutions' },
+    { id: 'section-04', label: 'How It Works', keywords: 'mechanics story loop feelings talents' },
+    { id: 'section-05', label: 'How to Apply It Daily', keywords: 'habits steps control map chart' },
+    { id: 'section-06', label: 'Benefits & Consequences', keywords: 'results outcomes long term' },
+    { id: 'section-07', label: 'Narrative Examples', keywords: 'scenes dialogue wrong right' },
+    { id: 'section-08', label: 'Real-World Examples', keywords: 'stories people scripture' },
+    { id: 'story-adam', label: 'Adam & Eve (Real-World Examples)', keywords: 'garden blame genesis' },
+    { id: 'story-joseph', label: 'Joseph (Real-World Examples)', keywords: 'egypt brothers genesis' },
+    { id: 'story-nehemiah', label: 'Nehemiah (Real-World Examples)', keywords: 'wall jerusalem initiative' },
+    { id: 'section-09', label: 'One-Sentence Summary', keywords: 'remember key line' },
+    { id: 'section-10', label: 'Quiz', keywords: 'test questions score' },
+    { id: 'section-11', label: 'Disclaimer & Sources', keywords: 'kjv translation references' },
+    { id: 'section-12', label: 'Full Original Text (Verbatim)', keywords: 'lesson source original' }
+  ];
+  const searchInput = document.getElementById('search-input');
+  const searchResults = document.getElementById('search-results');
+  let activeResultIndex = -1;
+  function renderResults(matches) {
+    searchResults.innerHTML = '';
+    activeResultIndex = -1;
+    if (matches.length === 0) { searchResults.classList.remove('visible'); return; }
+    matches.slice(0, 8).forEach(function (m) {
+      const item = document.createElement('div');
+      item.className = 'search-result-item';
+      item.setAttribute('role', 'option');
+      item.dataset.targetId = m.id;
+      item.textContent = m.label;
+      searchResults.appendChild(item);
+    });
+    searchResults.classList.add('visible');
+  }
+  function closeSearch() { searchInput.value = ''; renderResults([]); }
+  function goToResult(id) { scrollToAnchor(id); closeSearch(); }
+  searchInput.addEventListener('input', function () {
+    const q = searchInput.value.trim().toLowerCase();
+    if (q.length === 0) { renderResults([]); return; }
+    renderResults(searchIndex.filter(function (entry) {
+      return entry.label.toLowerCase().includes(q) || entry.keywords.toLowerCase().includes(q);
+    }));
+  });
+  searchInput.addEventListener('keydown', function (e) {
+    const items = searchResults.querySelectorAll('.search-result-item');
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeResultIndex = Math.min(activeResultIndex + 1, items.length - 1);
+      items.forEach(function (item, i) { item.classList.toggle('active', i === activeResultIndex); });
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeResultIndex = Math.max(activeResultIndex - 1, 0);
+      items.forEach(function (item, i) { item.classList.toggle('active', i === activeResultIndex); });
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const target = items[activeResultIndex] || items[0];
+      if (target) goToResult(target.dataset.targetId);
+    } else if (e.key === 'Escape') {
+      closeSearch();
+    }
+  });
+  searchResults.addEventListener('click', function (e) {
+    const item = e.target.closest('.search-result-item');
+    if (item) goToResult(item.dataset.targetId);
+  });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('#search-wrap')) closeSearch();
+  });
+
+  // ===== Heart (shared Supabase project, matches the Library homepage) =====
+  function canonicalGuideUrl() {
+    let url = window.location.origin + window.location.pathname;
+    if (!url.endsWith('/')) url += '/';
+    return url;
+  }
+  const SUPABASE_URL = "https://gtwqjkrkupkcpxafdepg.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_bYetZP5wIfGluCKzTjfcbg_O0FdpXwj";
+  const HEARTS_ENABLED = !!SUPABASE_URL && !!SUPABASE_ANON_KEY && !!window.supabase;
+  const sb = HEARTS_ENABLED ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+  const VOTER_KEY = "lol_voter_id_v1";
+  function getVoterId() {
+    try {
+      let id = localStorage.getItem(VOTER_KEY);
+      if (!id) {
+        id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('v-' + Date.now() + '-' + Math.random().toString(16).slice(2));
+        localStorage.setItem(VOTER_KEY, id);
+      }
+      return id;
+    } catch (e) { return 'v-' + Date.now(); }
+  }
+  (function () {
+    if (!HEARTS_ENABLED) {
+      document.getElementById('heart-toggle-top') && document.getElementById('heart-toggle-top').remove();
+      document.querySelector('.heart-closing-card') && document.querySelector('.heart-closing-card').remove();
+      return;
+    }
+    const guideUrl = canonicalGuideUrl();
+    const voterId = getVoterId();
+    const buttons = [document.getElementById('heart-toggle-top'), document.getElementById('heart-toggle-bottom')].filter(Boolean);
+    let hearted = false;
+    function syncUI() {
+      buttons.forEach(function (btn) {
+        btn.setAttribute('aria-pressed', hearted ? 'true' : 'false');
+        btn.classList.add('pulsing');
+        setTimeout(function () { btn.classList.remove('pulsing'); }, 320);
+      });
+    }
+    sb.from('guide_hearts').select('guide_url').eq('guide_url', guideUrl).eq('voter_id', voterId)
+      .then(function (res) {
+        if (!res.error && res.data && res.data.length > 0) {
+          hearted = true;
+          buttons.forEach(function (btn) { btn.setAttribute('aria-pressed', 'true'); });
+        }
+      })
+      .catch(function () { /* non-critical */ });
+    async function toggle() {
+      const nowActive = !hearted;
+      hearted = nowActive;
+      syncUI();
+      try {
+        if (nowActive) {
+          const { error } = await sb.from('guide_hearts').insert({ guide_url: guideUrl, voter_id: voterId });
+          if (error && error.code !== '23505') throw error;
+        } else {
+          const { error } = await sb.from('guide_hearts').delete().eq('guide_url', guideUrl).eq('voter_id', voterId);
+          if (error) throw error;
+        }
+      } catch (err) {
+        hearted = !nowActive;
+        syncUI();
+      }
+    }
+    buttons.forEach(function (btn) { btn.addEventListener('click', toggle); });
+  })();
+
+  // ===== Listen aloud =====
+  (function () {
+    const btn = document.getElementById('listen-toggle');
+    if (!btn) return;
+    if (!('speechSynthesis' in window)) { btn.style.display = 'none'; return; }
+    const sections = Array.from(document.querySelectorAll('section[id]'));
+    let queue = [];
+    let queueIndex = 0;
+    let speaking = false;
+    function findCurrentSectionIndex() {
+      let idx = 0;
+      sections.forEach(function (sec, i) {
+        if (sec.getBoundingClientRect().top <= 120) idx = i;
+      });
+      return idx;
+    }
+    function speakNext() {
+      if (queueIndex >= queue.length) { stop(); return; }
+      const utter = new SpeechSynthesisUtterance(queue[queueIndex].innerText || '');
+      utter.rate = 1;
+      utter.onend = function () {
+        if (!speaking) return;
+        queueIndex++;
+        speakNext();
+      };
+      speechSynthesis.speak(utter);
+    }
+    function start() {
+      speaking = true;
+      btn.classList.add('speaking');
+      btn.querySelector('.listen-icon').textContent = '⏸';
+      btn.setAttribute('aria-pressed', 'true');
+      queue = sections.slice(findCurrentSectionIndex());
+      queueIndex = 0;
+      speakNext();
+    }
+    function stop() {
+      speaking = false;
+      speechSynthesis.cancel();
+      btn.classList.remove('speaking');
+      btn.querySelector('.listen-icon').textContent = '🔊';
+      btn.setAttribute('aria-pressed', 'false');
+    }
+    btn.addEventListener('click', function () { speaking ? stop() : start(); });
+    document.body.addEventListener('click', function (e) {
+      if (speaking && e.target.closest('a[href^="#"]')) stop();
+    });
+  })();
+
+  // ===== Print =====
+  document.getElementById('print-pdf-btn').addEventListener('click', function () { window.print(); });
+
+  // ===== Share =====
+  (function () {
+    const btn = document.getElementById('share-btn');
+    const toast = document.getElementById('share-toast');
+    if (!btn) return;
+    function showToast(message) {
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add('visible');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(function () { toast.classList.remove('visible'); }, 2400);
+    }
+    function getShareData() {
+      const title = document.title || 'Interactive Guide';
+      const taglineEl = document.getElementById('hero-tagline');
+      const text = taglineEl ? taglineEl.textContent.trim() : '';
+      return { title: title, text: text, url: window.location.href };
+    }
+    btn.addEventListener('click', async function () {
+      const data = getShareData();
+      if (navigator.share) {
+        try { await navigator.share(data); return; }
+        catch (err) { if (err && err.name === 'AbortError') return; }
+      }
+      const shareText = [data.title, data.text, data.url].filter(Boolean).join('\n');
+      try {
+        await navigator.clipboard.writeText(shareText);
+        showToast('Link copied to clipboard');
+      } catch (err) {
+        const ta = document.createElement('textarea');
+        ta.value = shareText;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); showToast('Link copied to clipboard'); }
+        catch (err2) { showToast('Could not copy — copy the URL from the address bar'); }
+        document.body.removeChild(ta);
+      }
+    });
+  })();
+
+  // ===== Topbar overflow menu (mobile) =====
+  (function () {
+    const moreBtn = document.getElementById('topbar-more-btn');
+    const moreMenu = document.getElementById('topbar-more-menu');
+    if (!moreBtn || !moreMenu) return;
+    function closeMenu() { moreMenu.classList.remove('open'); moreBtn.setAttribute('aria-expanded', 'false'); }
+    function openMenu() { moreMenu.classList.add('open'); moreBtn.setAttribute('aria-expanded', 'true'); }
+    moreBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      moreMenu.classList.contains('open') ? closeMenu() : openMenu();
+    });
+    moreMenu.addEventListener('click', function (e) { if (e.target.closest('button')) closeMenu(); });
+    document.addEventListener('click', function (e) { if (!e.target.closest('#topbar-more-wrap')) closeMenu(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+  })();
+
+  // ===== Accordion cards (Section 03) =====
+  function toggleTacticCard(card) {
+    const isOpen = card.classList.toggle('open');
+    card.setAttribute('aria-expanded', isOpen);
+  }
+  document.querySelectorAll('.tactic-card').forEach(function (card) {
+    card.addEventListener('click', function () { toggleTacticCard(card); });
+    card.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTacticCard(card); }
+    });
+  });
+
+  // ===== Story cards (Section 08) =====
+  document.querySelectorAll('.story-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const full = btn.nextElementSibling;
+      const isOpen = full.classList.toggle('open');
+      btn.setAttribute('aria-expanded', isOpen);
+      btn.textContent = isOpen ? '↑ Collapse' : 'Read their story →';
+    });
+  });
+
+  // ===== Micro-checks =====
+  document.querySelectorAll('.micro-check').forEach(function (block) {
+    const checkId = block.dataset.checkId;
+    block.addEventListener('click', function (e) {
+      const optBtn = e.target.closest('.micro-check-option');
+      if (!optBtn || optBtn.disabled) return;
+      const opts = Array.from(block.querySelectorAll('.micro-check-option'));
+      const correctOpt = block.querySelector('.micro-check-option[data-correct="true"]');
+      correctOpt.classList.add('correct');
+      const wasCorrect = optBtn === correctOpt;
+      if (!wasCorrect) optBtn.classList.add('selected', 'wrong');
+      opts.forEach(function (o) { o.disabled = true; });
+      microAnswers[checkId] = optBtn.dataset.optionId;
+      optionOrder[checkId] = currentOrder(block);
+      saveProgress({ microAnswers: microAnswers, optionOrder: optionOrder });
+    });
+  });
+
+  // ===== Quiz (one at a time) =====
+  const quizCards = Array.from(document.querySelectorAll('#quiz-card-viewport .quiz-card'));
+  let quizCurrent = 0;
+  let answered = new Array(15).fill(null);
+  let selectedIndexes = new Array(15).fill(null);
+  let missed = new Array(15).fill(null);
+  function updateScoreDisplay() {
+    const correct = answered.filter(function (a) { return a === 'correct'; }).length;
+    document.getElementById('quiz-score').textContent = correct;
+  }
+  function renderQuizCard(i) {
+    quizCards.forEach(function (c, idx) { c.hidden = idx !== i; });
+    document.getElementById('quiz-current-num').textContent = i + 1;
+    document.getElementById('quiz-prev-btn').disabled = i === 0;
+    const card = quizCards[i];
+    const isAnswered = answered[i] !== null;
+    const nextBtn = document.getElementById('quiz-next-btn');
+    nextBtn.disabled = !isAnswered;
+    nextBtn.textContent = i === 14 ? 'Finish' : 'Next';
+    const opts = Array.from(card.querySelectorAll('.quiz-option'));
+    opts.forEach(function (o) { o.classList.remove('selected', 'correct', 'wrong'); o.disabled = isAnswered; });
+    if (isAnswered) {
+      card.querySelector('.quiz-option[data-correct="true"]').classList.add('correct');
+      const selIdx = selectedIndexes[i];
+      if (selIdx !== null && answered[i] === 'wrong') {
+        opts[selIdx].classList.add('selected', 'wrong');
+      }
+    }
+  }
+  function selectQuizOption(card, optBtn) {
+    const i = Number(card.dataset.question);
+    if (answered[i] !== null) return;
+    const opts = Array.from(card.querySelectorAll('.quiz-option'));
+    selectedIndexes[i] = opts.indexOf(optBtn);
+    const correctOpt = card.querySelector('.quiz-option[data-correct="true"]');
+    correctOpt.classList.add('correct');
+    if (optBtn === correctOpt) {
+      answered[i] = 'correct';
+      missed[i] = null;
+    } else {
+      optBtn.classList.add('selected', 'wrong');
+      answered[i] = 'wrong';
+      missed[i] = { id: card.dataset.testsId, label: card.dataset.testsLabel };
+    }
+    opts.forEach(function (o) { o.disabled = true; });
+    updateScoreDisplay();
+    const nextBtn = document.getElementById('quiz-next-btn');
+    nextBtn.disabled = false;
+    nextBtn.textContent = i === 14 ? 'Finish' : 'Next';
+  }
+  document.getElementById('quiz-card-viewport').addEventListener('click', function (e) {
+    const optBtn = e.target.closest('.quiz-option');
+    if (!optBtn || optBtn.disabled) return;
+    selectQuizOption(optBtn.closest('.quiz-card'), optBtn);
+  });
+  document.getElementById('quiz-prev-btn').addEventListener('click', function () {
+    if (quizCurrent > 0) { quizCurrent--; renderQuizCard(quizCurrent); }
+  });
+  document.getElementById('quiz-next-btn').addEventListener('click', function () {
+    if (quizCurrent === 14) {
+      document.getElementById('quiz-stepper').hidden = true;
+      showQuizComplete(answered.filter(function (a) { return a === 'correct'; }).length);
+      return;
+    }
+    quizCurrent++;
+    renderQuizCard(quizCurrent);
+  });
+  renderQuizCard(0);
+
+  // ===== Quiz complete summary =====
+  function showQuizComplete(correct) {
+    document.getElementById('quiz-final-score').textContent = correct + ' / 15';
+    const msgEl = document.getElementById('quiz-complete-message');
+    const listEl = document.getElementById('quiz-review-list');
+    listEl.innerHTML = '';
+    const growthEl = document.getElementById('quiz-growth-line');
+    const pre = (loadProgress() || {}).pretestScore;
+    if (typeof pre === 'number') {
+      const after = answered.slice(0, 3).filter(function (a) { return a === 'correct'; }).length;
+      growthEl.textContent = after === pre ? 'Questions 1–3: held steady at ' + pre + '/3.' : 'Questions 1–3: ' + pre + '/3 before → ' + after + '/3 after.';
+    } else { growthEl.textContent = ''; }
+    if (correct === 15) {
+      msgEl.textContent = "Perfect score — you've got this one down.";
+    } else {
+      msgEl.textContent = "Here's what to revisit:";
+      missed.forEach(function (m, i) {
+        if (!m) return;
+        const card = quizCards[i];
+        const explanationText = card.querySelector('.quiz-explanation').textContent;
+        const yourOptBtn = card.querySelectorAll('.quiz-option')[selectedIndexes[i]];
+        const correctOptBtn = card.querySelector('.quiz-option[data-correct="true"]');
+        const item = document.createElement('div');
+        item.className = 'quiz-review-item';
+        const a = document.createElement('a');
+        a.className = 'quiz-review-link';
+        a.href = '#' + m.id;
+        a.textContent = 'Q' + (i + 1) + ' — Review: ' + m.label + ' →';
+        const yourAns = document.createElement('p');
+        yourAns.className = 'quiz-review-your-answer';
+        yourAns.textContent = 'Your answer: ' + (yourOptBtn ? yourOptBtn.textContent : '');
+        const correctAns = document.createElement('p');
+        correctAns.className = 'quiz-review-correct-answer';
+        correctAns.textContent = 'Correct answer: ' + correctOptBtn.textContent;
+        const exp = document.createElement('p');
+        exp.className = 'quiz-review-explanation';
+        exp.textContent = explanationText;
+        item.appendChild(a);
+        item.appendChild(yourAns);
+        item.appendChild(correctAns);
+        item.appendChild(exp);
+        listEl.appendChild(item);
+      });
+    }
+    document.getElementById('quiz-complete').hidden = false;
+    document.getElementById('quiz-export-results-btn').disabled = false;
+    saveProgress({ answered: answered, selectedIndexes: selectedIndexes, missed: missed });
+  }
+  document.getElementById('quiz-review-list').addEventListener('click', function (e) {
+    const link = e.target.closest('a.quiz-review-link');
+    if (!link) return;
+    e.preventDefault();
+    scrollToAnchor(link.getAttribute('href').slice(1));
+  });
+  document.getElementById('quiz-retake-btn').addEventListener('click', function () {
+    quizCurrent = 0;
+    answered = new Array(15).fill(null);
+    selectedIndexes = new Array(15).fill(null);
+    missed = new Array(15).fill(null);
+    quizCards.forEach(function (card) {
+      card.querySelectorAll('.quiz-option').forEach(function (opt) {
+        opt.classList.remove('selected', 'correct', 'wrong');
+        opt.disabled = false;
+      });
+    });
+    document.getElementById('quiz-score').textContent = '0';
+    Object.keys(optionOrder).forEach(function (k) { if (k.indexOf('quiz-') === 0) delete optionOrder[k]; });
+    quizCards.forEach(function (card) { shuffleOptions(card); });
+    document.getElementById('quiz-export-results-btn').disabled = true;
+    saveProgress({ answered: answered, selectedIndexes: selectedIndexes, missed: missed, optionOrder: optionOrder });
+    document.getElementById('quiz-complete').hidden = true;
+    document.getElementById('quiz-stepper').hidden = false;
+    renderQuizCard(0);
+    scrollToAnchor('section-10');
+  });
+  document.getElementById('quiz-reset-btn').addEventListener('click', function () {
+    resetProgress();
+    location.reload();
+  });
+
+  // ===== Shuffle + persistence wiring =====
+  const optionOrder = {};
+  const microAnswers = {};
+  function blockKey(block) {
+    return block.classList.contains('micro-check') ? block.dataset.checkId : 'quiz-' + block.dataset.question;
+  }
+  function optionsBox(block) { return block.querySelector('.quiz-options, .micro-check-options'); }
+  function currentOrder(block) {
+    return Array.from(optionsBox(block).children).map(function (b) { return b.dataset.optionId; });
+  }
+  function shuffleOptions(block) {
+    const box = optionsBox(block);
+    const btns = Array.from(box.children);
+    for (let i = btns.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = btns[i]; btns[i] = btns[j]; btns[j] = tmp;
+    }
+    btns.forEach(function (b) { box.appendChild(b); });
+  }
+  function applySavedOrder(block, ids) {
+    const box = optionsBox(block);
+    ids.forEach(function (id) {
+      const btn = box.querySelector('[data-option-id="' + id + '"]');
+      if (btn) box.appendChild(btn);
+    });
+  }
+
+  // 1. Order: answered questions keep their saved order, everything else gets a fresh shuffle.
+  const savedState = loadProgress() || {};
+  Object.assign(optionOrder, savedState.optionOrder || {});
+  Object.assign(microAnswers, savedState.microAnswers || {});
+  document.querySelectorAll('.quiz-card, .micro-check').forEach(function (block) {
+    const key = blockKey(block);
+    if (optionOrder[key]) applySavedOrder(block, optionOrder[key]); else shuffleOptions(block);
+  });
+
+  // 2. Restore the quiz.
+  if (Array.isArray(savedState.answered) && savedState.answered.length === 15) {
+    answered = savedState.answered;
+    selectedIndexes = savedState.selectedIndexes || selectedIndexes;
+    missed = savedState.missed || missed;
+    updateScoreDisplay();
+    const firstOpen = answered.indexOf(null);
+    if (firstOpen === -1) {
+      document.getElementById('quiz-stepper').hidden = true;
+      showQuizComplete(answered.filter(function (a) { return a === 'correct'; }).length);
+    } else {
+      quizCurrent = firstOpen;
+      renderQuizCard(quizCurrent);
+    }
+  }
+
+  // 3. Restore the micro-checks.
+  document.querySelectorAll('.micro-check').forEach(function (block) {
+    const picked = microAnswers[block.dataset.checkId];
+    if (!picked) return;
+    block.querySelectorAll('.micro-check-option').forEach(function (o) { o.disabled = true; });
+    block.querySelector('.micro-check-option[data-correct="true"]').classList.add('correct');
+    const pickedBtn = block.querySelector('[data-option-id="' + picked + '"]');
+    if (pickedBtn && !pickedBtn.dataset.correct) pickedBtn.classList.add('selected', 'wrong');
+  });
+
+  // 4. Mark sections the reader already reached.
+  (function () {
+    const furthest = savedState.furthestSection || 0;
+    document.querySelectorAll('.sb-link').forEach(function (a) {
+      const n = parseInt((a.dataset.sectionId || '').replace('section-', ''), 10);
+      if (n && n <= furthest) a.classList.add('visited');
+    });
+  })();
+
+  // 5. Save after every quiz answer.
+  document.getElementById('quiz-card-viewport').addEventListener('click', function (e) {
+    const optBtn = e.target.closest('.quiz-option');
+    if (!optBtn) return;
+    const card = optBtn.closest('.quiz-card');
+    const i = Number(card.dataset.question);
+    if (answered[i] === null) return;
+    optionOrder[blockKey(card)] = currentOrder(card);
+    saveProgress({ answered: answered, selectedIndexes: selectedIndexes, missed: missed, optionOrder: optionOrder });
+  });
+
+  // ===== Pre-test (first 3 quiz questions, once) =====
+  (function () {
+    const box = document.getElementById('pretest');
+    if (!box) return;
+    if (typeof (loadProgress() || {}).pretestScore === 'number') { box.remove(); return; }
+    const body = document.getElementById('pretest-body');
+    let idx = 0, score = 0;
+    const qs = quizCards.slice(0, 3).map(function (card) {
+      const c = card.cloneNode(true);
+      c.classList.remove('quiz-card');
+      c.classList.add('pretest-q');
+      c.hidden = true;
+      c.querySelectorAll('.quiz-option').forEach(function (o) {
+        o.classList.remove('selected', 'correct', 'wrong');
+        o.disabled = false;
+      });
+      const ex = c.querySelector('.quiz-explanation');
+      if (ex) ex.remove();
+      shuffleOptions(c);
+      body.appendChild(c);
+      return c;
+    });
+    qs[0].hidden = false;
+    body.addEventListener('click', function (e) {
+      const btn = e.target.closest('.quiz-option');
+      if (!btn || btn.disabled) return;
+      const q = btn.closest('.pretest-q');
+      const right = q.querySelector('.quiz-option[data-correct="true"]');
+      right.classList.add('correct');
+      if (btn === right) score++; else btn.classList.add('selected', 'wrong');
+      q.querySelectorAll('.quiz-option').forEach(function (o) { o.disabled = true; });
+      setTimeout(function () {
+        q.hidden = true;
+        idx++;
+        if (idx < qs.length) {
+          qs[idx].hidden = false;
+        } else {
+          saveProgress({ pretestScore: score });
+          body.innerHTML = '<p class="pretest-done">Starting point saved. Read on and see how far you move by the end.</p>';
+        }
+      }, 900);
+    });
+  })();
+
+  // ===== Scroll spy =====
+  const sectionTitles = {
+    'section-01': 'Why This Matters',
+    'section-02': 'What It Is',
+    'section-03': 'The Core Framework',
+    'section-04': 'How It Works',
+    'section-05': 'How to Apply It',
+    'section-06': 'Benefits & Consequences',
+    'section-07': 'Narrative Examples',
+    'section-08': 'Real-World Examples',
+    'section-09': 'One-Sentence Summary',
+    'section-10': 'Quiz',
+    'section-11': 'Disclaimer & Sources',
+    'section-12': 'Full Original Text'
+  };
+  let currentSection = 'Introduction';
+  const scrollSpy = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        document.querySelectorAll('.sb-link').forEach(function (a) {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+        });
+        const num = parseInt(id.replace('section-', ''), 10);
+        if (num > ((loadProgress() || {}).furthestSection || 0)) saveProgress({ furthestSection: num });
+        if (sectionTitles[id]) {
+          document.getElementById('topbar-title').textContent = sectionTitles[id];
+          currentSection = sectionTitles[id];
+        }
+      }
+    });
+  }, { rootMargin: '-15% 0px -60% 0px' });
+  document.querySelectorAll('section[id]').forEach(function (s) { scrollSpy.observe(s); });
+
+  // ===== Chart.js: the reader's own Control Map =====
+  const charts = [];
+  const ctlIds = ['ctl-control', 'ctl-influence', 'ctl-cannot'];
+  function readCtl() {
+    return ctlIds.map(function (id) {
+      const v = parseInt(document.getElementById(id).value, 10);
+      return isNaN(v) ? 0 : Math.max(0, Math.min(99, v));
+    });
+  }
+  function renderCharts() {
+    if (!window.Chart) return;
+    charts.forEach(function (c) { c.destroy(); });
+    charts.length = 0;
+    const cs = getComputedStyle(document.documentElement);
+    const green = cs.getPropertyValue('--green').trim();
+    const accent2 = cs.getPropertyValue('--accent2').trim();
+    const accent = cs.getPropertyValue('--accent').trim();
+    const muted = cs.getPropertyValue('--text-muted').trim();
+    const border = cs.getPropertyValue('--border').trim();
+    const card = cs.getPropertyValue('--bg-card').trim();
+    const vals = readCtl();
+    const total = vals.reduce(function (a, b) { return a + b; }, 0);
+    const hasData = total > 0;
+    charts.push(new Chart(document.getElementById('chart-control'), {
+      type: 'doughnut',
+      data: {
+        labels: hasData ? ['Can control', 'Can influence', 'Cannot control'] : ['Add numbers above'],
+        datasets: [{ data: hasData ? vals : [1], backgroundColor: hasData ? [green, accent2, accent] : [border], borderColor: card, borderWidth: 2 }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { color: muted } }, tooltip: { enabled: hasData } }
+      }
+    }));
+    const readout = document.getElementById('control-readout');
+    if (!hasData) { readout.textContent = ''; }
+    else if (vals[2] > vals[0] + vals[1]) { readout.textContent = 'Most of what you listed is outside your control. Pick one item from the first two groups and act on it today.'; }
+    else { readout.textContent = 'Good. Most of your list is something you can act on. Pick one item from “Can control” and do it today.'; }
+  }
+  ctlIds.forEach(function (id) { document.getElementById(id).addEventListener('input', renderCharts); });
+  renderCharts();
+  document.getElementById('theme-toggle').addEventListener('click', function () { setTimeout(renderCharts, 50); });
+
+  // ===== Quiz DOCX export =====
+  const docxLib = window.docx || {};
+  const { Document, Packer, Paragraph, TextRun, HeadingLevel, PageBreak } = docxLib;
+  function slugifyTitle(str) {
+    return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+  function triggerDocxDownload(doc, filename) {
+    Packer.toBlob(doc).then(function (blob) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+  }
+  function buildQuestionParagraphs(mode) {
+    const paras = [];
+    quizCards.forEach(function (card, i) {
+      const qText = card.querySelector('.quiz-q-text').textContent;
+      paras.push(new Paragraph({ text: (i + 1) + '. ' + qText, spacing: { before: 200, after: 80 } }));
+      const opts = Array.from(card.querySelectorAll('.quiz-option'));
+      opts.forEach(function (opt, idx) {
+        const letter = String.fromCharCode(65 + idx);
+        let line;
+        if (mode === 'results') {
+          const isCorrect = opt.dataset.correct === 'true';
+          const isSelected = selectedIndexes[i] === idx;
+          line = '     ' + letter + '.  ' + opt.textContent;
+          if (isSelected && isCorrect) line += '   ← Your answer (Correct)';
+          else if (isSelected && !isCorrect) line += '   ← Your answer (Incorrect)';
+          else if (isCorrect) line += '   ← Correct answer';
+        } else {
+          line = '     ☐ ' + letter + '.  ' + opt.textContent;
+        }
+        paras.push(new Paragraph({ text: line, spacing: { after: 40 } }));
+      });
+      if (mode === 'results' && answered[i] === 'wrong') {
+        const explanationText = card.querySelector('.quiz-explanation').textContent;
+        paras.push(new Paragraph({ children: [new TextRun({ text: 'Why: ' + explanationText, italics: true })], spacing: { before: 40, after: 80 } }));
+      }
+    });
+    return paras;
+  }
+  function generateBlankExamDocx() {
+    const examParas = [
+      new Paragraph({ text: document.title + ' — Exam', heading: HeadingLevel.HEADING_1 }),
+      new Paragraph({ text: 'Name: _____________________________   Date: ______________', spacing: { after: 300 } })
+    ].concat(buildQuestionParagraphs(null));
+    const keyParas = [
+      new Paragraph({ children: [new PageBreak()] }),
+      new Paragraph({ text: 'Answer Key — Guide-Giver Copy Only', heading: HeadingLevel.HEADING_1, spacing: { after: 200 } })
+    ];
+    quizCards.forEach(function (card, i) {
+      const opts = Array.from(card.querySelectorAll('.quiz-option'));
+      const correctIdx = opts.findIndex(function (o) { return o.dataset.correct === 'true'; });
+      const explanationText = card.querySelector('.quiz-explanation').textContent;
+      keyParas.push(new Paragraph({ text: (i + 1) + '.  ' + String.fromCharCode(65 + correctIdx), spacing: { before: 120, after: 20 } }));
+      keyParas.push(new Paragraph({ children: [new TextRun({ text: explanationText, italics: true })], spacing: { after: 20 } }));
+    });
+    const doc = new Document({ sections: [{ children: examParas.concat(keyParas) }] });
+    triggerDocxDownload(doc, slugifyTitle(document.title) + '-exam.docx');
+  }
+  function generateResultsDocx() {
+    const correct = answered.filter(function (a) { return a === 'correct'; }).length;
+    const header = [
+      new Paragraph({ text: document.title + ' — My Results', heading: HeadingLevel.HEADING_1 }),
+      new Paragraph({ text: 'Name: _____________________________   Date: ______________', spacing: { after: 100 } }),
+      new Paragraph({ text: 'Score: ' + correct + ' / 15', spacing: { after: 300 } })
+    ];
+    const doc = new Document({ sections: [{ children: header.concat(buildQuestionParagraphs('results')) }] });
+    const dateStr = new Date().toISOString().slice(0, 10);
+    triggerDocxDownload(doc, slugifyTitle(document.title) + '-results-' + dateStr + '.docx');
+  }
+  document.getElementById('quiz-export-blank-btn').addEventListener('click', function () {
+    if (Document) generateBlankExamDocx();
+  });
+  document.getElementById('quiz-export-results-btn').addEventListener('click', function () {
+    if (!this.disabled && Document) generateResultsDocx();
+  });
+
+});
+</script>
+</body>
+</html>
